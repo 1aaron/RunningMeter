@@ -7,12 +7,18 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.aaron.grainchaintest.utils.Globals
+import com.google.android.gms.maps.model.Marker
 
 class MapFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var locations = arrayListOf<Location>()
+    var locations = arrayListOf<Location>()
     private val myApp = application
     private val _index = MutableLiveData<Int>()
+    var initialMarker: Marker? = null
+    var endMarker: Marker? = null
+    var stoppedTag = "STOPPED"
+    var runningTag = "RUNNING"
+
     val text: LiveData<String> = Transformations.map(_index) {
         "Hello world from section: $it"
     }
