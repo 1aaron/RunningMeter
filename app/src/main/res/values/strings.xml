@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GrainChain Test</string>
+    <string name="map_tab_text">Map</string>
+    <string name="list_tab_text">My Routes</string>
+</resources>
