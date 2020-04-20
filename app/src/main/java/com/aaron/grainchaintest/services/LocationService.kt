@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import com.aaron.grainchaintest.utils.Globals
 import com.google.android.gms.location.*
 import com.google.gson.Gson
+import kotlinx.coroutines.*
 
 class LocationService: Service() {
     private val locationinterval: Long = 2000
@@ -28,9 +29,10 @@ class LocationService: Service() {
     private val binder = LocationServiceBinder()
     private var locations = arrayListOf<Location>()
     private val TAG = "LocationService"
-
+    private var job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + job)
     var stopped = true
-
+    var seconds = 0
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
@@ -55,8 +57,20 @@ class LocationService: Service() {
         return START_STICKY
     }
 
+    fun startTimer() {
+        seconds = 0
+        stopped = false
+        uiScope.launch {
+            while (!stopped) {
+                delay(1000)
+                seconds += 1
+            }
+        }
+    }
+
     fun startTracking() {
         initializeLocationManager()
+        startTimer()
         try {
             locationClient?.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         } catch (ex: SecurityException) {
@@ -64,6 +78,14 @@ class LocationService: Service() {
         } catch (ex: IllegalArgumentException) {
             // Log.d(TAG, "gps provider does not exist " + ex.getMessage());
         }
+    }
+
+    fun stopTimer() {
+        stopped = true
+        val intent = Intent(Globals.TIME_INTENT_FILTER)
+        intent.putExtra(Globals.TIMER_KEY, seconds)
+        sendBroadcast(intent)
+        seconds = 0
     }
 
     override fun onDestroy() {
@@ -74,6 +96,7 @@ class LocationService: Service() {
 
     fun stopTracking() {
         //TODO: see if return all locations here
+        stopTimer()
         onDestroy()
     }
 

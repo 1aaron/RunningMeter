@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.aaron.grainchaintest.ListScreen.ListFragment
 import com.aaron.grainchaintest.R
 import com.aaron.grainchaintest.mapScreen.MapFragment
 
@@ -20,7 +21,7 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager)
         return if (position == 0) {
             MapFragment.getInstance()
         } else {
-            Fragment()
+            ListFragment.getInstance()
         }
     }
 

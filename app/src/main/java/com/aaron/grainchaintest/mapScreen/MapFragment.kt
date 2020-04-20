@@ -105,6 +105,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onResume()
         activity?.let {
             it.registerReceiver(broadCastReceiver, IntentFilter(Globals.NEW_LOCATION_INTENT_FILTER))
+            it.registerReceiver(broadCastReceiver, IntentFilter(Globals.TIME_INTENT_FILTER))
         }
     }
 
@@ -151,11 +152,19 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val broadCastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.e("broadcast",intent.action ?: intent.toString())
-            intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
-                val locations = it as ArrayList<Location>
-                viewModel.locations = locations
+            if (intent.action == Globals.NEW_LOCATION_INTENT_FILTER) {
+                intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
+                    val locations = it as ArrayList<Location>
+                    viewModel.locations = locations
+                }
+                viewModel.paintRoute(inMap = gMap)
             }
-            viewModel.paintRoute(inMap = gMap)
+            if (intent.action == Globals.TIME_INTENT_FILTER) {
+                intent.extras?.get(Globals.TIMER_KEY)?.let {
+                    val seconds = it as Int
+                    viewModel.seconds = seconds
+                }
+            }
         }
     }
 

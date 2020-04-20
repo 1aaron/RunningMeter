@@ -8,9 +8,9 @@ data class Route(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0,
     var alias: String? = "",
-    var distance: Float? = null,
-    var time: Long? = null, //seconds
-    var locations: List<Location>? = null,
+    var distance: Double? = null,
+    var time: Int? = null, //seconds
+    var locations: ArrayList<Location>? = null,
     var initialLocation: Location? = null,
     var lastLocation: Location? = null
 )

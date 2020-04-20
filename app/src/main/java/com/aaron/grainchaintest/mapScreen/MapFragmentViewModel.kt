@@ -17,12 +17,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.aaron.grainchaintest.R
+import com.google.maps.android.PolyUtil
 
 interface MapFragmentViewModelInterface {
     var locations: ArrayList<Location>
     var stoppedTag: String
     var runningTag: String
     var polilyne: PolylineOptions
+    var seconds: Int
     fun reviewPermissions(): Boolean
     fun paintRoute(inMap: GoogleMap)
     fun saveRoute(alias: String, completion: () -> Unit)
@@ -40,6 +42,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override var stoppedTag = "STOPPED"
     override var runningTag = "RUNNING"
     override var polilyne = PolylineOptions()
+    override var seconds = 0
 
     override fun paintRoute(inMap: GoogleMap) {
         polilyne = PolylineOptions()
@@ -71,7 +74,17 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override fun saveRoute(alias: String, completion: () -> Unit) {
         uiScope.launch {
             val db = GCTestDB.getAppDataBase(myApp.applicationContext)
-            val route = Route(0,alias,0f,0,locations,locations.first(),locations.last())
+            var distance = 0.0
+            val initialLoc = locations.first()
+            val startPoint = LatLng(initialLoc.latitude,initialLoc.longitude)
+            val lastLoc = locations.last()
+            val endPoint = LatLng(lastLoc.latitude,lastLoc.longitude)
+            locations.map { loc ->
+                val p = LatLng(loc.latitude,loc.latitude)
+                val segment = PolyUtil.distanceToLine(p,startPoint,endPoint)
+                distance += segment
+            }
+            val route = Route(0,alias,distance,seconds,locations,locations.first(),locations.last())
             db.routeDao().addRoute(route)
             completion()
         }

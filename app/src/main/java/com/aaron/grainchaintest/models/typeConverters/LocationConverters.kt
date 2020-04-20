@@ -23,14 +23,14 @@ class LocationConverters {
 
         @TypeConverter
         @JvmStatic
-        fun fromLocationList(value: List<Location>): String? {
+        fun fromLocationList(value: ArrayList<Location>): String? {
             return gson.toJson(value)
         }
 
         @TypeConverter
         @JvmStatic
-        fun fromStringToList(value: String): List<Location>? {
-            val listType = object : TypeToken<List<Location>>() {}.type
+        fun fromStringToList(value: String): ArrayList<Location>? {
+            val listType = object : TypeToken<ArrayList<Location>>() {}.type
             return gson.fromJson(value, listType)
         }
     }

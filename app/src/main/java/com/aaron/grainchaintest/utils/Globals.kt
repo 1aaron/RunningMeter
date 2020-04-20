@@ -3,6 +3,8 @@ package com.aaron.grainchaintest.utils
 import android.Manifest
 
 object Globals {
+    const val TIMER_KEY = "TIME"
+    const val TIME_INTENT_FILTER = "com.aaron.grainchaintest.timeEnd"
     const val NEW_LOCATION_INTENT_FILTER = "com.aaron.grainchaintest.newLocation"
     const val LOCATION_INTENT_KEY = "LOCATIONS"
     val PERMISSIONS_TO_ASK = arrayOf(
