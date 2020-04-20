@@ -42,7 +42,7 @@ class LocationService: Service() {
                 val location = locationResult.lastLocation
                 locations.add(location)
                 val json = Gson().toJson(location)
-                Log.e(TAG,json)
+                //Log.e(TAG,json)
                 val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
                 intent.putExtra(Globals.LOCATION_INTENT_KEY, locations)
                 sendBroadcast(intent)

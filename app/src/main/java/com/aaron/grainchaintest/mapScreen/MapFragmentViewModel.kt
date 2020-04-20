@@ -6,28 +6,53 @@ import android.location.Location
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
+import com.aaron.grainchaintest.models.GCTestDB
+import com.aaron.grainchaintest.models.Route
 import com.aaron.grainchaintest.utils.Globals
-import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import com.aaron.grainchaintest.R
 
-class MapFragmentViewModel(application: Application) : AndroidViewModel(application) {
+interface MapFragmentViewModelInterface {
+    var locations: ArrayList<Location>
+    var stoppedTag: String
+    var runningTag: String
+    var polilyne: PolylineOptions
+    fun reviewPermissions(): Boolean
+    fun paintRoute(inMap: GoogleMap)
+    fun saveRoute(alias: String, completion: () -> Unit)
+    fun setMarkers(map: GoogleMap)
+}
 
-    var locations = arrayListOf<Location>()
+class MapFragmentViewModel(application: Application) : AndroidViewModel(application), MapFragmentViewModelInterface {
+
     private val myApp = application
     private val _index = MutableLiveData<Int>()
-    var initialMarker: Marker? = null
-    var endMarker: Marker? = null
-    var stoppedTag = "STOPPED"
-    var runningTag = "RUNNING"
+    private var viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    val text: LiveData<String> = Transformations.map(_index) {
-        "Hello world from section: $it"
+    override var locations = arrayListOf<Location>()
+    override var stoppedTag = "STOPPED"
+    override var runningTag = "RUNNING"
+    override var polilyne = PolylineOptions()
+
+    override fun paintRoute(inMap: GoogleMap) {
+        polilyne = PolylineOptions()
+        locations.map { location ->
+            polilyne.add(LatLng(location.latitude,location.longitude))
+        }
+        val lastPoint = polilyne.points.last()
+        inMap.clear()
+        inMap.addPolyline(polilyne)
+        inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,24f))
     }
 
-    fun setIndex(index: Int) {
-        _index.value = index
-    }
-
-    fun reviewPermissions(): Boolean {
+    override fun reviewPermissions(): Boolean {
         var permissionsAccepted = true
         var permissionsToCheck = Globals.PERMISSIONS_TO_ASK.copyOf()
         if (Build.VERSION.SDK_INT < 29)
@@ -41,5 +66,28 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             }
         }
         return permissionsAccepted
+    }
+
+    override fun saveRoute(alias: String, completion: () -> Unit) {
+        uiScope.launch {
+            val db = GCTestDB.getAppDataBase(myApp.applicationContext)
+            val route = Route(0,alias,0f,0,locations,locations.first(),locations.last())
+            db.routeDao().addRoute(route)
+            completion()
+        }
+    }
+
+    override fun setMarkers(map: GoogleMap) {
+        var initialMarker = MarkerOptions()
+        var finishMarker = MarkerOptions()
+        val initialLoc = locations.first()
+        val lastLoc = locations.last()
+        initialMarker.position(LatLng(initialLoc.latitude,initialLoc.longitude))
+        initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
+        map.addMarker(initialMarker)
+
+        finishMarker.position(LatLng(lastLoc.latitude,lastLoc.longitude))
+        finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
+        map.addMarker(finishMarker)
     }
 }

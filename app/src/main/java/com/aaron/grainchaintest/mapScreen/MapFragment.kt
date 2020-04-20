@@ -1,13 +1,16 @@
 package com.aaron.grainchaintest.mapScreen
 
+import android.app.AlertDialog
 import android.content.*
 import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -24,7 +27,7 @@ import com.google.android.gms.maps.model.PolylineOptions
  */
 class MapFragment : Fragment(), OnMapReadyCallback {
 
-    private lateinit var viewModel: MapFragmentViewModel
+    private lateinit var viewModel: MapFragmentViewModelInterface
     private lateinit var binder: MapFragmentBinding
     private var gpsService: LocationService? = null
     private lateinit var gMap: GoogleMap
@@ -60,8 +63,32 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 binder.fab.setImageResource(R.drawable.walk)
                 it.tag = viewModel.stoppedTag
                 disconnectLocationService()
+                presentAliasDialog()
             }
         }
+    }
+
+    fun presentAliasDialog() {
+        val textAlias = EditText(context)
+        val aliasDialog = AlertDialog.Builder(context)
+            .setView(textAlias)
+            .setPositiveButton("Save",null)
+            .create()
+        aliasDialog.setCanceledOnTouchOutside(false)
+        aliasDialog.setTitle("Set a name for route")
+        aliasDialog.setOnShowListener {
+            aliasDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                if (textAlias.text.isNotEmpty()) {
+                    viewModel.saveRoute(textAlias.text.toString()) {
+                        aliasDialog.dismiss()
+                        viewModel.setMarkers(gMap)
+                    }
+                } else {
+                    Toast.makeText(context,"Add a name for route",Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        aliasDialog.show()
     }
 
     private fun disconnectLocationService() {
@@ -128,19 +155,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 val locations = it as ArrayList<Location>
                 viewModel.locations = locations
             }
-            paintRoute()
+            viewModel.paintRoute(inMap = gMap)
         }
-    }
-
-    private fun paintRoute() {
-        val polilyne = PolylineOptions()
-        viewModel.locations.map { location ->
-            polilyne.add(LatLng(location.latitude,location.longitude))
-        }
-        val lastPoint = polilyne.points.last()
-        gMap.clear()
-        gMap.addPolyline(polilyne)
-        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,24f))
     }
 
     override fun onDestroy() {

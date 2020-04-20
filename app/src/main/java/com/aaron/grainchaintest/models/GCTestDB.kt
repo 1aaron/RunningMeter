@@ -13,9 +13,9 @@ abstract class GCTestDB: RoomDatabase() {
     abstract fun routeDao(): RouteDao
 
     companion object {
-        var INSTANCE: GCTestDB? = null
+        private var INSTANCE: GCTestDB? = null
         private const val DATABASE_NAME = "GCTestDB"
-        fun getAppDataBase(context: Context): GCTestDB? =
+        fun getAppDataBase(context: Context): GCTestDB =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(context.applicationContext, GCTestDB::class.java, DATABASE_NAME)
                     .build().also { INSTANCE = it }
