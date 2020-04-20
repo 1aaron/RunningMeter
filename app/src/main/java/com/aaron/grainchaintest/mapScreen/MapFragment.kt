@@ -16,11 +16,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.aaron.grainchaintest.R
 import com.aaron.grainchaintest.databinding.MapFragmentBinding
+import com.aaron.grainchaintest.models.Locations
 import com.aaron.grainchaintest.services.LocationService
 import com.aaron.grainchaintest.utils.Globals
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import java.lang.Exception
 
 /**
  * A placeholder fragment containing a simple view.
@@ -93,11 +95,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun disconnectLocationService() {
         gpsService?.stopTracking()
-        activity?.let {
-            val application = it.application
-            val gpsIntent = Intent(application, LocationService::class.java)
-            application.stopService(gpsIntent)
-            application.unbindService(serviceConnection)
+        try {
+            activity?.let {
+                val application = it.application
+                val gpsIntent = Intent(application, LocationService::class.java)
+                application.stopService(gpsIntent)
+                application.unbindService(serviceConnection)
+            }
+        }catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -154,7 +160,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             Log.e("broadcast",intent.action ?: intent.toString())
             if (intent.action == Globals.NEW_LOCATION_INTENT_FILTER) {
                 intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
-                    val locations = it as ArrayList<Location>
+                    val locations = it as ArrayList<Locations>
                     viewModel.locations = locations
                 }
                 viewModel.paintRoute(inMap = gMap)
@@ -169,9 +175,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     override fun onDestroy() {
-        disconnectLocationService()
-        activity?.let {
-            it.unregisterReceiver(broadCastReceiver)
+        try {
+            disconnectLocationService()
+            activity?.let {
+                it.unregisterReceiver(broadCastReceiver)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         super.onDestroy()
     }

@@ -1,6 +1,8 @@
 package com.aaron.grainchaintest.models.typeConverters
 
 import android.location.Location
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -23,15 +25,16 @@ class LocationConverters {
 
         @TypeConverter
         @JvmStatic
-        fun fromLocationList(value: ArrayList<Location>): String? {
+        fun fromLocationList(value: List<Location>): String? {
             return gson.toJson(value)
         }
 
         @TypeConverter
         @JvmStatic
-        fun fromStringToList(value: String): ArrayList<Location>? {
-            val listType = object : TypeToken<ArrayList<Location>>() {}.type
-            return gson.fromJson(value, listType)
+        fun fromStringToList(value: String): LiveData<List<Location>?> {
+            val listType = object : TypeToken<List<Location>>() {}.type
+            val values: List<Location>? = gson.fromJson(value, listType)
+            return MutableLiveData(values)
         }
     }
 }

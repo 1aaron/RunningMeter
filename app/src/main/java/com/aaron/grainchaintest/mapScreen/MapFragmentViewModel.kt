@@ -17,10 +17,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.aaron.grainchaintest.R
+import com.aaron.grainchaintest.models.Locations
 import com.google.maps.android.PolyUtil
 
 interface MapFragmentViewModelInterface {
-    var locations: ArrayList<Location>
+    var locations: ArrayList<Locations>
     var stoppedTag: String
     var runningTag: String
     var polilyne: PolylineOptions
@@ -38,7 +39,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    override var locations = arrayListOf<Location>()
+    override var locations = arrayListOf<Locations>()
     override var stoppedTag = "STOPPED"
     override var runningTag = "RUNNING"
     override var polilyne = PolylineOptions()
@@ -84,8 +85,12 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
                 val segment = PolyUtil.distanceToLine(p,startPoint,endPoint)
                 distance += segment
             }
-            val route = Route(0,alias,distance,seconds,locations,locations.first(),locations.last())
-            db.routeDao().addRoute(route)
+            val route = Route(0,alias,distance,seconds)
+            val idInserted = db.routeDao().addRoute(route)
+            for (location in locations) {
+                location.routeId = idInserted
+                db.locationsDao().addLocation(location)
+            }
             completion()
         }
     }

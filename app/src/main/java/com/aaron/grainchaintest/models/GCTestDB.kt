@@ -7,10 +7,10 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.aaron.grainchaintest.models.typeConverters.LocationConverters
 
-@Database(entities = [Route::class], version = 1, exportSchema = false)
-@TypeConverters(LocationConverters::class)
+@Database(entities = [Route::class, Locations::class], version = 1, exportSchema = false)
 abstract class GCTestDB: RoomDatabase() {
     abstract fun routeDao(): RouteDao
+    abstract fun locationsDao(): LocationsDao
 
     companion object {
         private var INSTANCE: GCTestDB? = null

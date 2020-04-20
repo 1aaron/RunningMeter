@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.aaron.grainchaintest.models.Locations
 import com.aaron.grainchaintest.utils.Globals
 import com.google.android.gms.location.*
 import com.google.gson.Gson
@@ -27,7 +28,7 @@ class LocationService: Service() {
     private var locationClient: FusedLocationProviderClient? = null
     private lateinit var locationCallback: LocationCallback
     private val binder = LocationServiceBinder()
-    private var locations = arrayListOf<Location>()
+    private var locations = arrayListOf<Locations>()
     private val TAG = "LocationService"
     private var job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
@@ -41,10 +42,9 @@ class LocationService: Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
-                val location = locationResult.lastLocation
-                locations.add(location)
-                val json = Gson().toJson(location)
-                //Log.e(TAG,json)
+                val loc = locationResult.lastLocation
+                val myLocation = Locations(0,0,loc.latitude,loc.longitude)
+                locations.add(myLocation)
                 val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
                 intent.putExtra(Globals.LOCATION_INTENT_KEY, locations)
                 sendBroadcast(intent)
