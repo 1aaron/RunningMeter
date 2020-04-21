@@ -90,7 +90,6 @@ class LocationService: Service() {
     }
 
     fun stopTracking() {
-        //TODO: see if return all locations here
         stopTimer()
         onDestroy()
     }
