@@ -14,7 +14,6 @@ import com.aaron.grainchaintest.adapters.ListAdapter
 import com.aaron.grainchaintest.databinding.ListFragmentBinding
 import com.aaron.grainchaintest.detailScreen.DetailScreenFragment
 import com.aaron.grainchaintest.models.Route
-import kotlinx.android.synthetic.main.list_fragment.view.*
 
 class ListFragment : Fragment() {
 
@@ -42,10 +41,8 @@ class ListFragment : Fragment() {
     }
 
     private var routeClickListener: (Route) -> Unit = { route: Route ->
-        //TODO: open detail view
-        Log.e("routeClick",route.alias ?: "alias")
         activity?.supportFragmentManager?.beginTransaction()
-            ?.replace(R.id.content_fragment,DetailScreenFragment(route))
+            ?.replace(R.id.content_main,DetailScreenFragment(route))
             ?.addToBackStack(null)
             ?.commit()
     }

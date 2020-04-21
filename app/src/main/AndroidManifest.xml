@@ -20,11 +20,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service android:name=".services.LocationService" android:enabled="true" android:exported="false"/>
-        <receiver android:name=".utils.LocationBroadcast" android:exported="false">
-            <intent-filter>
-                <action android:name="com.aaron.grainchaintest.newLocation"/>
-            </intent-filter>
-        </receiver>
         <activity
             android:screenOrientation="portrait"
             android:name=".activities.MainActivity"

@@ -10,13 +10,10 @@ import com.aaron.grainchaintest.models.Route
 
 class ListAdapter(val routes: List<Route>, val listener: (Route) -> Unit): RecyclerView.Adapter<ListAdapter.ListAdapterViewHolder>() {
 
-    //lateinit var itemBinder: RouteItemBinding
-
     override fun getItemCount() = routes.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListAdapterViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        //itemBinder = RouteItemBinding.inflate(inflater)
         return ListAdapterViewHolder(inflater.inflate(R.layout.route_item,parent,false))
     }
 
@@ -34,7 +31,7 @@ class ListAdapter(val routes: List<Route>, val listener: (Route) -> Unit): Recyc
     }
 
     inner class ListAdapterViewHolder(val view: View): RecyclerView.ViewHolder(view) {
-        val txtRoute: TextView = view.findViewById(R.id.txtDistance) //itemBinder.txtRoute
-        val txtTime: TextView = view.findViewById(R.id.txtTime) //itemBinder.txtTime
+        val txtRoute: TextView = view.findViewById(R.id.txtDistance)
+        val txtTime: TextView = view.findViewById(R.id.txtTime)
     }
 }

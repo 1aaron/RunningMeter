@@ -2,21 +2,18 @@ package com.aaron.grainchaintest.detailScreen
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import com.aaron.grainchaintest.R
 import com.aaron.grainchaintest.models.GCTestDB
 import com.aaron.grainchaintest.models.Locations
 import com.aaron.grainchaintest.models.Route
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+
 
 interface DetailScreenViewModelInterface {
     val route: Route
@@ -24,6 +21,7 @@ interface DetailScreenViewModelInterface {
     fun paintRoute(inMap: GoogleMap)
     fun deleteRoute(completion: () -> Unit)
 }
+
 class DetailScreenViewModel(application: Application) : AndroidViewModel(application), DetailScreenViewModelInterface {
     private val myApp = application
     private lateinit var db: GCTestDB
@@ -31,6 +29,8 @@ class DetailScreenViewModel(application: Application) : AndroidViewModel(applica
     override lateinit var route: Route
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    private val initialMarker = MarkerOptions()
+    private val finishMarker = MarkerOptions()
 
     override fun load(route: Route, completion: () -> Unit) {
         this.route = route
@@ -46,11 +46,16 @@ class DetailScreenViewModel(application: Application) : AndroidViewModel(applica
         locations.map { location ->
             polilyne.add(LatLng(location.latitude,location.longitude))
         }
-        val lastPoint = polilyne.points.last()
         inMap.clear()
         inMap.addPolyline(polilyne)
-        inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,24f))
         setMarkers(inMap)
+        val builder = LatLngBounds.Builder()
+        builder.include(initialMarker.position)
+        builder.include(finishMarker.position)
+        val bounds = builder.build()
+        val padding = 100
+        val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+        inMap.animateCamera(cu)
     }
 
     override fun deleteRoute(completion: () -> Unit) {
@@ -62,8 +67,6 @@ class DetailScreenViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun setMarkers(map: GoogleMap) {
-        val initialMarker = MarkerOptions()
-        val finishMarker = MarkerOptions()
         val initialLoc = locations.first()
         val lastLoc = locations.last()
         initialMarker.position(LatLng(initialLoc.latitude,initialLoc.longitude))

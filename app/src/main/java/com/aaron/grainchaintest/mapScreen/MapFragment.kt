@@ -6,7 +6,6 @@ import android.location.Location
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,12 +15,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.aaron.grainchaintest.R
 import com.aaron.grainchaintest.databinding.MapFragmentBinding
-import com.aaron.grainchaintest.models.Locations
 import com.aaron.grainchaintest.services.LocationService
 import com.aaron.grainchaintest.utils.Globals
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PolylineOptions
 import java.lang.Exception
 
 /**
@@ -160,7 +156,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             Log.e("broadcast",intent.action ?: intent.toString())
             if (intent.action == Globals.NEW_LOCATION_INTENT_FILTER) {
                 intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
-                    val locations = it as ArrayList<Locations>
+                    val locations = it as ArrayList<Location>
                     viewModel.locations = locations
                 }
                 viewModel.paintRoute(inMap = gMap)

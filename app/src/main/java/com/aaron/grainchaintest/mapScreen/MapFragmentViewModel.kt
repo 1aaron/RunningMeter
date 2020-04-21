@@ -18,10 +18,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.aaron.grainchaintest.R
 import com.aaron.grainchaintest.models.Locations
-import com.google.maps.android.PolyUtil
 
 interface MapFragmentViewModelInterface {
-    var locations: ArrayList<Locations>
+    var locations: ArrayList<Location>
     var stoppedTag: String
     var runningTag: String
     var polilyne: PolylineOptions
@@ -39,7 +38,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    override var locations = arrayListOf<Locations>()
+    override var locations = arrayListOf<Location>()
     override var stoppedTag = "STOPPED"
     override var runningTag = "RUNNING"
     override var polilyne = PolylineOptions()
@@ -53,7 +52,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
         val lastPoint = polilyne.points.last()
         inMap.clear()
         inMap.addPolyline(polilyne)
-        inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,24f))
+        inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,18f))
     }
 
     override fun reviewPermissions(): Boolean {
@@ -76,20 +75,16 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
         uiScope.launch {
             val db = GCTestDB.getAppDataBase(myApp.applicationContext)
             var distance = 0.0
-            val initialLoc = locations.first()
-            val startPoint = LatLng(initialLoc.latitude,initialLoc.longitude)
-            val lastLoc = locations.last()
-            val endPoint = LatLng(lastLoc.latitude,lastLoc.longitude)
-            locations.map { loc ->
-                val p = LatLng(loc.latitude,loc.latitude)
-                val segment = PolyUtil.distanceToLine(p,startPoint,endPoint)
-                distance += segment
+            for(x in 1 until locations.size) {
+                val beginLocation = locations[x - 1]
+                val endLocation = locations[x]
+                distance += beginLocation.distanceTo(endLocation)
             }
             val route = Route(0,alias,distance,seconds)
             val idInserted = db.routeDao().addRoute(route)
             for (location in locations) {
-                location.routeId = idInserted
-                db.locationsDao().addLocation(location)
+                val loToSave = Locations(0,idInserted,location.latitude,location.longitude)
+                db.locationsDao().addLocation(loToSave)
             }
             completion()
         }

@@ -1,6 +1,5 @@
 package com.aaron.grainchaintest.models
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import java.io.Serializable
 

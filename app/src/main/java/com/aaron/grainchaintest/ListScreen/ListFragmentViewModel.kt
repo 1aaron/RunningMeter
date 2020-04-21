@@ -3,7 +3,6 @@ package com.aaron.grainchaintest.ListScreen
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.aaron.grainchaintest.models.GCTestDB
 import com.aaron.grainchaintest.models.Route
 import kotlinx.coroutines.CoroutineScope
