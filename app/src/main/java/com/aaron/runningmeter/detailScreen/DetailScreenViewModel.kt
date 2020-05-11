@@ -1,11 +1,11 @@
-package com.aaron.grainchaintest.detailScreen
+package com.aaron.runningmeter.detailScreen
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.models.GCTestDB
-import com.aaron.grainchaintest.models.Locations
-import com.aaron.grainchaintest.models.Route
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.models.GCTestDB
+import com.aaron.runningmeter.models.Locations
+import com.aaron.runningmeter.models.Route
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*

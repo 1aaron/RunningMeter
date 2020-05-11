@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.models
+package com.aaron.runningmeter.models
 
 import android.content.Context
 import androidx.room.Database

@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest
+package com.aaron.runningmeter
 
 import org.junit.Test
 

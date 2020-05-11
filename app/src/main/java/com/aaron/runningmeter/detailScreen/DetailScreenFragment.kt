@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.detailScreen
+package com.aaron.runningmeter.detailScreen
 
 import android.content.ContentValues
 import android.content.Intent
@@ -10,9 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.databinding.DetailScreenFragmentBinding
-import com.aaron.grainchaintest.models.Route
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.databinding.DetailScreenFragmentBinding
+import com.aaron.runningmeter.models.Route
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment

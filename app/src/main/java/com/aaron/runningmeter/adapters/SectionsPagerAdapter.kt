@@ -1,12 +1,12 @@
-package com.aaron.grainchaintest.adapters
+package com.aaron.runningmeter.adapters
 
 import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.mapScreen.MapFragment
-import com.aaron.grainchaintest.secondViewBase.BaseFragment
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.mapScreen.MapFragment
+import com.aaron.runningmeter.secondViewBase.BaseFragment
 
 private val TAB_TITLES = arrayOf(
         R.string.map_tab_text,

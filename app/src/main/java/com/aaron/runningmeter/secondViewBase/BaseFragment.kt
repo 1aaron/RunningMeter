@@ -1,13 +1,13 @@
-package com.aaron.grainchaintest.secondViewBase
+package com.aaron.runningmeter.secondViewBase
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.aaron.grainchaintest.ListScreen.ListFragment
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.databinding.FragmentBaseBinding
+import com.aaron.runningmeter.ListScreen.ListFragment
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.databinding.FragmentBaseBinding
 
 class BaseFragment : Fragment() {
     private lateinit var binder: FragmentBaseBinding

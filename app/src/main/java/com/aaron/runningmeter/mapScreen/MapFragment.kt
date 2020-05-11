@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.mapScreen
+package com.aaron.runningmeter.mapScreen
 
 import android.app.AlertDialog
 import android.content.*
@@ -13,10 +13,10 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.databinding.MapFragmentBinding
-import com.aaron.grainchaintest.services.LocationService
-import com.aaron.grainchaintest.utils.Globals
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.databinding.MapFragmentBinding
+import com.aaron.runningmeter.services.LocationService
+import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.maps.*
 import java.lang.Exception
 

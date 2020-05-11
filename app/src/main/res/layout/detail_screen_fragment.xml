@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
             name="route"
-            type="com.aaron.grainchaintest.models.Route" />
+            type="com.aaron.runningmeter.models.Route" />
     </data>
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".detailScreen.DetailScreenFragment">
@@ -45,9 +45,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp"
-                android:text='@{"Distance: " + route.distance / 1000}'
+                android:text='@{"Distance: " + route.distance + " kms"}'
                 android:textSize="19sp"
                 app:layout_constraintBottom_toTopOf="@id/btnShare"
+                app:layout_constraintEnd_toStartOf="@+id/txtTime"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
@@ -58,6 +60,8 @@
                 android:text="Time: 00:00:50"
                 android:textSize="19sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/txtDistance"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/txtDistance" />
 
             <Button
@@ -66,9 +70,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp"
-                android:textColor="#FFF"
                 android:background="#1E88E5"
                 android:text="Share"
+                android:textColor="#FFF"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnDelete"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -80,9 +84,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginBottom="8dp"
+                android:background="#C62828"
                 android:text="Delete"
                 android:textColor="#FFF"
-                android:background="#C62828"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"

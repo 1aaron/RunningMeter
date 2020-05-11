@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.models
+package com.aaron.runningmeter.models
 
 import androidx.lifecycle.LiveData
 import androidx.room.*

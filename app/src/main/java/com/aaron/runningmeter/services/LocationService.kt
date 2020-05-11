@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.services
+package com.aaron.runningmeter.services
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -11,7 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.annotation.RequiresApi
-import com.aaron.grainchaintest.utils.Globals
+import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
 

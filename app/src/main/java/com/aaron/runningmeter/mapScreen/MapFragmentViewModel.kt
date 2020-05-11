@@ -1,4 +1,4 @@
-package com.aaron.grainchaintest.mapScreen
+package com.aaron.runningmeter.mapScreen
 
 import android.app.Application
 import android.content.pm.PackageManager
@@ -6,9 +6,9 @@ import android.location.Location
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
-import com.aaron.grainchaintest.models.GCTestDB
-import com.aaron.grainchaintest.models.Route
-import com.aaron.grainchaintest.utils.Globals
+import com.aaron.runningmeter.models.GCTestDB
+import com.aaron.runningmeter.models.Route
+import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
@@ -16,8 +16,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.models.Locations
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.models.Locations
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 interface MapFragmentViewModelInterface {
     var locations: ArrayList<Location>
@@ -80,6 +82,10 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
                 val endLocation = locations[x]
                 distance += beginLocation.distanceTo(endLocation)
             }
+            distance /= 1000
+            val df = DecimalFormat("#.###")
+            df.roundingMode = RoundingMode.CEILING
+            distance = df.format(distance).toDouble()
             val route = Route(0,alias,distance,seconds)
             val idInserted = db.routeDao().addRoute(route)
             for (location in locations) {

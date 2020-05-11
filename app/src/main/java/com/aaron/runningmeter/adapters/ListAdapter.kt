@@ -1,12 +1,12 @@
-package com.aaron.grainchaintest.adapters
+package com.aaron.runningmeter.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.aaron.grainchaintest.R
-import com.aaron.grainchaintest.models.Route
+import com.aaron.runningmeter.R
+import com.aaron.runningmeter.models.Route
 
 class ListAdapter(val routes: List<Route>, val listener: (Route) -> Unit): RecyclerView.Adapter<ListAdapter.ListAdapterViewHolder>() {
 
