@@ -43,7 +43,7 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
         var reminder = (route.time ?: 1) % 3600
         val minutes = reminder / 60
         reminder %= 60
-        binder.txtTime.text = "Time: $hours:$minutes:$reminder"
+        binder.txtTime.text = getString(R.string.timeData,"$hours:$minutes:$reminder")
     }
 
     private fun shareImage(image: Bitmap) {
@@ -69,7 +69,7 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
                 }
 
                 share.putExtra(Intent.EXTRA_STREAM, uri)
-                startActivity(Intent.createChooser(share, "Share Image"))
+                startActivity(Intent.createChooser(share, getString(R.string.shareImage)))
             }
 
         }

@@ -88,7 +88,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     fun setTrackingState() {
         binder.fab.tag = viewModel.runningTag
         binder.fab.setImageResource(R.drawable.stop)
-        Toast.makeText(context,"begin route",Toast.LENGTH_SHORT).show()
+        Toast.makeText(context,getString(R.string.beginRoute),Toast.LENGTH_SHORT).show()
     }
 
     fun reviewGPSSettings() {
@@ -131,10 +131,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val textAlias = EditText(context)
         val aliasDialog = AlertDialog.Builder(context)
             .setView(textAlias)
-            .setPositiveButton("Save",null)
+            .setPositiveButton(getString(R.string.save),null)
             .create()
         aliasDialog.setCanceledOnTouchOutside(false)
-        aliasDialog.setTitle("Set a name for route")
+        aliasDialog.setTitle(getString(R.string.nameDialogTitle))
         aliasDialog.setOnShowListener {
             aliasDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 if (textAlias.text.isNotEmpty()) {
@@ -144,7 +144,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                         mInterstitialAd.show()
                     }
                 } else {
-                    Toast.makeText(context,"Add a name for route",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,getString(R.string.nameDialogTitle),Toast.LENGTH_SHORT).show()
                 }
             }
         }

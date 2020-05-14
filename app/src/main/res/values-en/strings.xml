@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Running Meter</string>
+    <string name="map_tab_text">Map</string>
+    <string name="list_tab_text">My Routes</string>
+    <string name="route">Route:</string>
+    <string name="time">Time:</string>
+    <string name="errorGPS">Error turning on GPS</string>
+    <string name="beginRoute">Begining route</string>
+    <string name="share">Share</string>
+    <string name="delete">Delete</string>
+    <string name="distance">Distance: %s kms</string>
+    <string name="routeName">Route: %s</string>
+    <string name="nameDialogTitle">Set a name for route</string>
+    <string name="save">Save</string>
+    <string name="timeData">Time: %s</string>
+    <string name="shareImage">Share image</string>
+</resources>
