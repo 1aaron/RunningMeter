@@ -4,6 +4,8 @@ import android.Manifest
 
 object Globals {
     const val TIMER_KEY = "TIME"
+    const val TEST_ANNOUNCEMENT_ID = "ca-app-pub-3940256099942544/103317371"
+    const val ANNOUNCEMENT_ID = "ca-app-pub-4258059828543306/6057962808"
     const val TIME_INTENT_FILTER = "com.aaron.runningmeter.timeEnd"
     const val NEW_LOCATION_INTENT_FILTER = "com.aaron.runningmeter.newLocation"
     const val LOCATION_INTENT_KEY = "LOCATIONS"

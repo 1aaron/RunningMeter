@@ -1,8 +1,10 @@
 package com.aaron.runningmeter.mapScreen
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -17,8 +19,16 @@ import com.aaron.runningmeter.R
 import com.aaron.runningmeter.databinding.MapFragmentBinding
 import com.aaron.runningmeter.services.LocationService
 import com.aaron.runningmeter.utils.Globals
-import com.google.android.gms.maps.*
-import java.lang.Exception
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.tasks.Task
+
 
 /**
  * A placeholder fragment containing a simple view.
@@ -30,9 +40,12 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var gpsService: LocationService? = null
     private lateinit var gMap: GoogleMap
     val PERMISSIONS_CHECK_CODE = 1
+    private lateinit var mInterstitialAd: InterstitialAd
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mInterstitialAd = InterstitialAd(context)
+        mInterstitialAd.adUnitId = Globals.TEST_ANNOUNCEMENT_ID //TODO: CHANGE FOR REAL ONE
         viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
     }
 
@@ -50,12 +63,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapView.getMapAsync(this)
         binder.fab.setOnClickListener {
+            mInterstitialAd.loadAd(AdRequest.Builder().build())
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
-                    prepareLocationService()
-                    it.tag = viewModel.runningTag
-                    binder.fab.setImageResource(R.drawable.stop)
-                    Toast.makeText(context,"begin route",Toast.LENGTH_SHORT).show()
+                    //TODO: REVIEW GPS SETTINGS
+                    gMap.clear()
+                    val locationManager: LocationManager = context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        prepareLocationService()
+                        setTrackingState()
+                    } else {
+                        reviewGPSSettings()
+                    }
                 }
             } else {
                 binder.fab.setImageResource(R.drawable.walk)
@@ -64,6 +83,48 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 presentAliasDialog()
             }
         }
+    }
+
+    fun setTrackingState() {
+        binder.fab.tag = viewModel.runningTag
+        binder.fab.setImageResource(R.drawable.stop)
+        Toast.makeText(context,"begin route",Toast.LENGTH_SHORT).show()
+    }
+
+    fun reviewGPSSettings() {
+        val locationRequest = LocationRequest.create()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val result: Task<LocationSettingsResponse> = LocationServices.getSettingsClient(activity!!)
+            .checkLocationSettings(builder.build())
+        result.addOnCompleteListener { task ->
+            try {
+                val response = task.getResult(ApiException::class.java)
+                prepareLocationService()
+                setTrackingState()
+            } catch (exception: ApiException) {
+                when (exception.statusCode) {
+                    LocationSettingsStatusCodes.SUCCESS -> {
+                        Log.e("CORRECTO","correcto!!!")
+                    }
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> {
+                        try {
+                            // Cast to a resolvable exception.
+                            val resolvable: ResolvableApiException = exception as ResolvableApiException
+                            startIntentSenderForResult(resolvable.resolution.intentSender,
+                                LocationRequest.PRIORITY_HIGH_ACCURACY,null,0,
+                                0,0,null)
+                        } catch (e: IntentSender.SendIntentException) {
+                            e.printStackTrace()
+                        } catch (e: ClassCastException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> { }
+                }
+            }
+        }
+
     }
 
     fun presentAliasDialog() {
@@ -80,6 +141,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     viewModel.saveRoute(textAlias.text.toString()) {
                         aliasDialog.dismiss()
                         viewModel.setMarkers(gMap)
+                        mInterstitialAd.show()
                     }
                 } else {
                     Toast.makeText(context,"Add a name for route",Toast.LENGTH_SHORT).show()
@@ -208,5 +270,18 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         gMap = map
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when(requestCode) {
+            LocationRequest.PRIORITY_HIGH_ACCURACY -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    prepareLocationService()
+                    setTrackingState()
+                } else {
+                    Toast.makeText(context,getString(R.string.errorGPS),Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 }

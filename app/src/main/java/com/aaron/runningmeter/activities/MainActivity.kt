@@ -6,6 +6,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
 import com.aaron.runningmeter.databinding.ActivityMainBinding
 import com.aaron.runningmeter.adapters.SectionsPagerAdapter
+import com.google.android.gms.ads.MobileAds
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-
+        MobileAds.initialize(this) {}
         val sectionsPagerAdapter =
             SectionsPagerAdapter(
                 this,
