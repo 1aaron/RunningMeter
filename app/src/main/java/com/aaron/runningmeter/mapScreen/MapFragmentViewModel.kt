@@ -2,6 +2,7 @@ package com.aaron.runningmeter.mapScreen
 
 import android.app.Application
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import androidx.core.content.ContextCompat
@@ -49,7 +50,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override fun paintRoute(inMap: GoogleMap) {
         polilyne = PolylineOptions()
         locations.map { location ->
-            polilyne.add(LatLng(location.latitude,location.longitude))
+            polilyne.add(LatLng(location.latitude,location.longitude)).color(Color.BLUE)
         }
         val lastPoint = polilyne.points.last()
         inMap.clear()
