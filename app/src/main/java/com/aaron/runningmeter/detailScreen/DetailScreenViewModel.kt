@@ -1,6 +1,7 @@
 package com.aaron.runningmeter.detailScreen
 
 import android.app.Application
+import android.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.GCTestDB
@@ -42,20 +43,22 @@ class DetailScreenViewModel(application: Application) : AndroidViewModel(applica
     }
 
     override fun paintRoute(inMap: GoogleMap) {
-        val polilyne = PolylineOptions()
-        locations.map { location ->
-            polilyne.add(LatLng(location.latitude,location.longitude))
+        if (locations.isNotEmpty()) {
+            val polilyne = PolylineOptions().color(Color.BLUE)
+            val builder = LatLngBounds.Builder()
+            locations.map { location ->
+                polilyne.add(LatLng(location.latitude,location.longitude))
+                builder.include(LatLng(location.latitude,location.longitude))
+            }
+            inMap.clear()
+            inMap.addPolyline(polilyne)
+            setMarkers(inMap)
+
+            val bounds = builder.build()
+            val padding = 100
+            val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
+            inMap.animateCamera(cu)
         }
-        inMap.clear()
-        inMap.addPolyline(polilyne)
-        setMarkers(inMap)
-        val builder = LatLngBounds.Builder()
-        builder.include(initialMarker.position)
-        builder.include(finishMarker.position)
-        val bounds = builder.build()
-        val padding = 100
-        val cu = CameraUpdateFactory.newLatLngBounds(bounds, padding)
-        inMap.animateCamera(cu)
     }
 
     override fun deleteRoute(completion: () -> Unit) {
@@ -67,15 +70,17 @@ class DetailScreenViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun setMarkers(map: GoogleMap) {
-        val initialLoc = locations.first()
-        val lastLoc = locations.last()
-        initialMarker.position(LatLng(initialLoc.latitude,initialLoc.longitude))
-        initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
-        map.addMarker(initialMarker)
+        if (locations.isNotEmpty()) {
+            val initialLoc = locations.first()
+            val lastLoc = locations.last()
+            initialMarker.position(LatLng(initialLoc.latitude, initialLoc.longitude))
+            initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
+            map.addMarker(initialMarker)
 
-        finishMarker.position(LatLng(lastLoc.latitude,lastLoc.longitude))
-        finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
-        map.addMarker(finishMarker)
+            finishMarker.position(LatLng(lastLoc.latitude, lastLoc.longitude))
+            finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
+            map.addMarker(finishMarker)
+        }
     }
 
 }

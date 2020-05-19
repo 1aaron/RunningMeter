@@ -48,9 +48,9 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override var seconds = 0
 
     override fun paintRoute(inMap: GoogleMap) {
-        polilyne = PolylineOptions()
+        polilyne = PolylineOptions().color(Color.BLUE)
         locations.map { location ->
-            polilyne.add(LatLng(location.latitude,location.longitude)).color(Color.BLUE)
+            polilyne.add(LatLng(location.latitude,location.longitude))
         }
         val lastPoint = polilyne.points.last()
         inMap.clear()
@@ -98,16 +98,18 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     override fun setMarkers(map: GoogleMap) {
-        var initialMarker = MarkerOptions()
-        var finishMarker = MarkerOptions()
-        val initialLoc = locations.first()
-        val lastLoc = locations.last()
-        initialMarker.position(LatLng(initialLoc.latitude,initialLoc.longitude))
-        initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
-        map.addMarker(initialMarker)
+        if (locations.isNotEmpty()) {
+            var initialMarker = MarkerOptions()
+            var finishMarker = MarkerOptions()
+            val initialLoc = locations.first()
+            val lastLoc = locations.last()
+            initialMarker.position(LatLng(initialLoc.latitude, initialLoc.longitude))
+            initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
+            map.addMarker(initialMarker)
 
-        finishMarker.position(LatLng(lastLoc.latitude,lastLoc.longitude))
-        finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
-        map.addMarker(finishMarker)
+            finishMarker.position(LatLng(lastLoc.latitude, lastLoc.longitude))
+            finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
+            map.addMarker(finishMarker)
+        }
     }
 }

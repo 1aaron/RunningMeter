@@ -5,14 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:padding="1dp">
 
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="4dp"
+        app:cardBackgroundColor="@android:color/white"
+        android:background="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,13 +23,26 @@
             android:layout_height="wrap_content"
             android:padding="8dp">
 
+            <ImageView
+                android:id="@+id/imgMarker"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/mapa_marcador"
+                app:layout_constraintBottom_toBottomOf="@+id/lblTime"
+                app:layout_constraintDimensionRatio="h,1:1"
+                app:layout_constraintEnd_toStartOf="@+id/lblRoute"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/lblRoute" />
+
             <TextView
                 android:id="@+id/lblRoute"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/route"
                 android:textSize="18sp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@+id/imgMarker"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
