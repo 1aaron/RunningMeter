@@ -26,7 +26,6 @@ class BaseFragment : Fragment() {
         super.onCreate(savedInstanceState)
         activity?.supportFragmentManager?.beginTransaction()
             ?.replace(R.id.content_main, ListFragment.getInstance())
-            ?.addToBackStack(null)
             ?.commit()
     }
 
