@@ -24,7 +24,8 @@ class ListAdapter(val routes: List<Route>, val listener: (Route) -> Unit): Recyc
         var reminder = (route.time ?: 1) % 3600
         val minutes = reminder / 60
         reminder %= 60
-        holder.txtTime.text = "$hours:$minutes:$reminder"
+        holder.txtTime.text = "${String.format("%02d",hours)}:${String.format("%02d",minutes)}:${String.format("%02d",reminder)}"
+        holder.txtDate.text = route.date
         holder.view.setOnClickListener {
             listener(route)
         }
@@ -33,5 +34,6 @@ class ListAdapter(val routes: List<Route>, val listener: (Route) -> Unit): Recyc
     inner class ListAdapterViewHolder(val view: View): RecyclerView.ViewHolder(view) {
         val txtRoute: TextView = view.findViewById(R.id.txtDistance)
         val txtTime: TextView = view.findViewById(R.id.txtTime)
+        val txtDate: TextView = view.findViewById(R.id.txtDate)
     }
 }

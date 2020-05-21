@@ -14,4 +14,5 @@
     <string name="save">Guardar</string>
     <string name="timeData">Tiempo: %s</string>
     <string name="shareImage">Compartir imágen</string>
+    <string name="saving">Guardando...</string>
 </resources>

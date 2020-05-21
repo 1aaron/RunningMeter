@@ -93,7 +93,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             val df = DecimalFormat("#.###")
             df.roundingMode = RoundingMode.CEILING
             distance = df.format(distance).toDouble()
-            //TODO: future updates calculate speed
+            //TODO: future updates -> calculate speed
             val route = Route(0,alias,distance,seconds,dateFormatter.format(Date()),0.0)
             val idInserted = db.routeDao().addRoute(route)
             for (location in locations) {
@@ -139,6 +139,6 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
         var reminder = (seconds) % 3600
         val minutes = reminder / 60
         reminder %= 60
-        return "$hours:$minutes:$reminder"
+        return "${String.format("%02d",hours)}:${String.format("%02d",minutes)}:${String.format("%02d",reminder)}"
     }
 }

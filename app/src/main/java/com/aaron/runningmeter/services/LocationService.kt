@@ -83,7 +83,6 @@ class LocationService: Service() {
         val intent = Intent(Globals.TIME_INTENT_FILTER)
         intent.putExtra(Globals.TIMER_KEY, seconds)
         sendBroadcast(intent)
-        seconds = 0
     }
 
     override fun onDestroy() {

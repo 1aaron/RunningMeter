@@ -45,7 +45,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mInterstitialAd = InterstitialAd(context)
-        mInterstitialAd.adUnitId = Globals.TEST_ANNOUNCEMENT_ID //TODO: CHANGE FOR REAL ONE
+        mInterstitialAd.adUnitId = Globals.ANNOUNCEMENT_ID //TODO: CHANGE FOR REAL ONE
         viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
     }
 
@@ -66,7 +66,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             mInterstitialAd.loadAd(AdRequest.Builder().build())
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
-                    //TODO: REVIEW GPS SETTINGS
                     gMap.clear()
                     val locationManager: LocationManager = context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -138,6 +137,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         aliasDialog.setOnShowListener {
             aliasDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                 if (textAlias.text.isNotEmpty()) {
+                    Toast.makeText(context,getString(R.string.saving),Toast.LENGTH_SHORT).show()
                     viewModel.saveRoute(textAlias.text.toString()) {
                         aliasDialog.dismiss()
                         viewModel.setMarkers(gMap)
