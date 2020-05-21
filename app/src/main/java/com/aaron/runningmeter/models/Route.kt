@@ -9,7 +9,9 @@ data class Route(
     var id: Long = 0,
     var alias: String? = "",
     var distance: Double? = null,
-    var time: Int? = null //seconds
+    var time: Int? = null, //seconds
+    var date: String? = null,
+    var speed: Double? = null
 )
 
 @Dao
