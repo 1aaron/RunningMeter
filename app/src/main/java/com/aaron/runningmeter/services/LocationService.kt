@@ -59,6 +59,9 @@ class LocationService: Service() {
             while (!stopped) {
                 delay(1000)
                 seconds += 1
+                val intent = Intent(Globals.TIME_INTENT_FILTER)
+                intent.putExtra(Globals.TIMER_KEY, seconds)
+                sendBroadcast(intent)
             }
         }
     }

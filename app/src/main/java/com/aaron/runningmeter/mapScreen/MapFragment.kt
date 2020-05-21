@@ -222,11 +222,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     viewModel.locations = locations
                 }
                 viewModel.paintRoute(inMap = gMap)
+                binder.txtDistance.text = getString(R.string.distance, viewModel.getDistance().toString())
             }
             if (intent.action == Globals.TIME_INTENT_FILTER) {
                 intent.extras?.get(Globals.TIMER_KEY)?.let {
                     val seconds = it as Int
                     viewModel.seconds = seconds
+                    binder.txtTime.text = getString(R.string.timeData, viewModel.getTimeStamp())
                 }
             }
         }

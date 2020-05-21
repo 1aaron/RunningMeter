@@ -21,6 +21,9 @@ import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Locations
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 interface MapFragmentViewModelInterface {
     var locations: ArrayList<Location>
@@ -32,6 +35,8 @@ interface MapFragmentViewModelInterface {
     fun paintRoute(inMap: GoogleMap)
     fun saveRoute(alias: String, completion: () -> Unit)
     fun setMarkers(map: GoogleMap)
+    fun getDistance(): Double
+    fun getTimeStamp(): String
 }
 
 class MapFragmentViewModel(application: Application) : AndroidViewModel(application), MapFragmentViewModelInterface {
@@ -46,6 +51,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override var runningTag = "RUNNING"
     override var polilyne = PolylineOptions()
     override var seconds = 0
+    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
 
     override fun paintRoute(inMap: GoogleMap) {
         polilyne = PolylineOptions().color(Color.BLUE)
@@ -87,7 +93,8 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             val df = DecimalFormat("#.###")
             df.roundingMode = RoundingMode.CEILING
             distance = df.format(distance).toDouble()
-            val route = Route(0,alias,distance,seconds)
+            //TODO: future updates calculate speed
+            val route = Route(0,alias,distance,seconds,dateFormatter.format(Date()),0.0)
             val idInserted = db.routeDao().addRoute(route)
             for (location in locations) {
                 val loToSave = Locations(0,idInserted,location.latitude,location.longitude)
@@ -111,5 +118,27 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
             map.addMarker(finishMarker)
         }
+    }
+
+    override fun getDistance(): Double {
+        var distance = 0.0
+        for(x in 1 until locations.size) {
+            val beginLocation = locations[x - 1]
+            val endLocation = locations[x]
+            distance += beginLocation.distanceTo(endLocation)
+        }
+        distance /= 1000
+        val df = DecimalFormat("#.###")
+        df.roundingMode = RoundingMode.CEILING
+        distance = df.format(distance).toDouble()
+        return distance
+    }
+
+    override fun getTimeStamp(): String {
+        val hours: Int = (seconds) / 3600
+        var reminder = (seconds) % 3600
+        val minutes = reminder / 60
+        reminder %= 60
+        return "$hours:$minutes:$reminder"
     }
 }
