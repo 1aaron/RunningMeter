@@ -21,6 +21,8 @@ import com.aaron.runningmeter.services.LocationService
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -28,7 +30,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.tasks.Task
-
+import java.util.Arrays
 
 /**
  * A placeholder fragment containing a simple view.
@@ -44,7 +46,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mInterstitialAd = InterstitialAd(context)
+        mInterstitialAd = InterstitialAd(activity!!)
         mInterstitialAd.adUnitId = Globals.ANNOUNCEMENT_ID //TODO: CHANGE FOR REAL ONE
         viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
     }
@@ -63,9 +65,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapView.getMapAsync(this)
         binder.fab.setOnClickListener {
-            mInterstitialAd.loadAd(AdRequest.Builder().build())
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
+                    //TODO: remove when uploading
+                    /*val testDeviceIds = Arrays.asList("FA681621979806E37E3B213A1F514285")
+                    val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+                    MobileAds.setRequestConfiguration(configuration)*/
+                    mInterstitialAd.loadAd(AdRequest.Builder().build())
                     gMap.clear()
                     val locationManager: LocationManager = context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -141,7 +147,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     viewModel.saveRoute(textAlias.text.toString()) {
                         aliasDialog.dismiss()
                         viewModel.setMarkers(gMap)
-                        mInterstitialAd.show()
+                        if(mInterstitialAd.isLoaded) {
+                            mInterstitialAd.show()
+                        }
                     }
                 } else {
                     Toast.makeText(context,getString(R.string.nameDialogTitle),Toast.LENGTH_SHORT).show()
@@ -215,7 +223,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private val broadCastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.e("broadcast",intent.action ?: intent.toString())
             if (intent.action == Globals.NEW_LOCATION_INTENT_FILTER) {
                 intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
                     val locations = it as ArrayList<Location>

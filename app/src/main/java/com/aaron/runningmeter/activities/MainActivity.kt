@@ -1,6 +1,7 @@
 package com.aaron.runningmeter.activities
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.tabs.TabLayout
 import androidx.viewpager.widget.ViewPager
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +19,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        MobileAds.initialize(this) {}
+        MobileAds.initialize(this) {
+            Log.e("ADS","initialize")
+        }
         val sectionsPagerAdapter =
             SectionsPagerAdapter(
                 this,
