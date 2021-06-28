@@ -3,11 +3,10 @@ package com.aaron.runningmeter.models
 import androidx.room.*
 import java.io.Serializable
 
-@Entity
+@Entity(foreignKeys = [ForeignKey(entity = Route::class,parentColumns = ["id"],childColumns = ["routeId"])])
 data class Locations (
     @PrimaryKey(autoGenerate = true)
     val id: Long,
-    @ForeignKey(entity = Route::class,parentColumns = ["id"],childColumns = ["routeId"])
     var routeId: Long,
     val latitude: Double,
     val longitude: Double

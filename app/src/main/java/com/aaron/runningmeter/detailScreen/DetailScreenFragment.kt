@@ -30,7 +30,10 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         binder = DetailScreenFragmentBinding.inflate(inflater)
-        binder.route = route
+        binder.apply {
+            route = this@DetailScreenFragment.route
+            lifecycleOwner = viewLifecycleOwner
+        }
         return binder.root
     }
 
@@ -85,7 +88,9 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
             }
             binder.btnShare.setOnClickListener {
                 gMap.snapshot { image ->
-                    shareImage(image)
+                    image?.let {
+                        shareImage(image)
+                    }
                 }
             }
         }

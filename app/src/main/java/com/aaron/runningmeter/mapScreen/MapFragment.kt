@@ -1,10 +1,12 @@
 package com.aaron.runningmeter.mapScreen
 
+import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
 import android.location.Location
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
@@ -13,16 +15,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.databinding.MapFragmentBinding
+import com.aaron.runningmeter.extensions.showLocationPermissionDialog
 import com.aaron.runningmeter.services.LocationService
 import com.aaron.runningmeter.utils.Globals
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.InterstitialAd
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -30,7 +40,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.tasks.Task
-import java.util.Arrays
 
 /**
  * A placeholder fragment containing a simple view.
@@ -42,12 +51,38 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private var gpsService: LocationService? = null
     private lateinit var gMap: GoogleMap
     val PERMISSIONS_CHECK_CODE = 1
-    private lateinit var mInterstitialAd: InterstitialAd
+    private var mInterstitialAd: InterstitialAd? = null
+    private final var TAG = "MapFragment"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mInterstitialAd = InterstitialAd(activity!!)
-        mInterstitialAd.adUnitId = Globals.ANNOUNCEMENT_ID //TODO: CHANGE FOR REAL ONE
+        val adRequest = AdRequest.Builder().build()
+        //TODO: Change this id for test or real one
+        InterstitialAd.load(requireContext(),Globals.TEST_ANNOUNCEMENT_ID,adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d(TAG, adError.message)
+                mInterstitialAd = null
+            }
+
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                Log.d(TAG, "Ad was loaded.")
+                mInterstitialAd = interstitialAd
+            }
+        })
+        mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
+            override fun onAdDismissedFullScreenContent() {
+                Log.d(TAG, "Ad was dismissed.")
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+                Log.d(TAG, "Ad failed to show.")
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                Log.d(TAG, "Ad showed fullscreen content.")
+                mInterstitialAd = null
+            }
+        }
         viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
     }
 
@@ -68,12 +103,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
                     //TODO: remove when uploading
-                    /*val testDeviceIds = Arrays.asList("FA681621979806E37E3B213A1F514285")
+                    val testDeviceIds = listOf("FA681621979806E37E3B213A1F514285")
                     val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-                    MobileAds.setRequestConfiguration(configuration)*/
-                    mInterstitialAd.loadAd(AdRequest.Builder().build())
+                    MobileAds.setRequestConfiguration(configuration)
+                    //TODO: until here
+                    mInterstitialAd?.show(requireActivity())
                     gMap.clear()
-                    val locationManager: LocationManager = context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                    val locationManager: LocationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         prepareLocationService()
                         setTrackingState()
@@ -100,7 +136,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val locationRequest = LocationRequest.create()
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-        val result: Task<LocationSettingsResponse> = LocationServices.getSettingsClient(activity!!)
+        val result: Task<LocationSettingsResponse> = LocationServices.getSettingsClient(requireActivity())
             .checkLocationSettings(builder.build())
         result.addOnCompleteListener { task ->
             try {
@@ -147,9 +183,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     viewModel.saveRoute(textAlias.text.toString()) {
                         aliasDialog.dismiss()
                         viewModel.setMarkers(gMap)
-                        if(mInterstitialAd.isLoaded) {
-                            mInterstitialAd.show()
-                        }
+                        mInterstitialAd?.show(requireActivity())
                     }
                 } else {
                     Toast.makeText(context,getString(R.string.nameDialogTitle),Toast.LENGTH_SHORT).show()
@@ -197,11 +231,32 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun verifyPermissionStatus(): Boolean {
-        if (!viewModel.reviewPermissions()) {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PERMISSION_DENIED
+            || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
+            if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                showLocationPermissionDialog() {
+                    askLocationPermissions()
+                }
+                return false
+            } else {
+                askLocationPermissions()
+                return false
+            }
+        } else {
+            return true
+        }
+        /*if (!viewModel.reviewPermissions()) {
             requestPermissions(Globals.PERMISSIONS_TO_ASK,PERMISSIONS_CHECK_CODE)
             return false
+        }*/
+    }
+
+    private fun askLocationPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+        } else {
+            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
         }
-        return true
     }
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
@@ -293,4 +348,20 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
+
+    val requestPermissionsLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissionResults ->
+            var accepted = true
+           for ((key, value) in permissionResults) {
+               Log.e(TAG, key)
+               if (!value) accepted = value
+           }
+            if (accepted) {
+                Log.e(TAG,"permissions accepted")
+            } else {
+                Toast.makeText(requireContext(),getString(R.string.accept_permisses),Toast.LENGTH_SHORT).show()
+            }
+        }
 }

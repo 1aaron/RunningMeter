@@ -52,7 +52,14 @@ class ListFragment : Fragment() {
         binder.routesList.setHasFixedSize(true)
         binder.routesList.layoutManager = LinearLayoutManager(context)
         viewModel.load {
-            viewModel.routes?.observe(viewLifecycleOwner, Observer { value ->
+            viewModel.routes?.observe(viewLifecycleOwner, { value ->
+                if (value.isNotEmpty()) {
+                    binder.emptyView.visibility = View.GONE
+                    binder.routesList.visibility = View.VISIBLE
+                } else {
+                    binder.emptyView.visibility = View.VISIBLE
+                    binder.routesList.visibility = View.GONE
+                }
                 recyclerAdapter = ListAdapter(value,routeClickListener)
                 binder.routesList.adapter = recyclerAdapter
                 recyclerAdapter?.notifyDataSetChanged()
