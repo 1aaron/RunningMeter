@@ -1,14 +1,18 @@
 package com.aaron.runningmeter.activities
 
+import android.app.ActivityManager
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.tabs.TabLayout
-import androidx.viewpager.widget.ViewPager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewpager.widget.ViewPager
 import com.aaron.runningmeter.R
-import com.aaron.runningmeter.databinding.ActivityMainBinding
 import com.aaron.runningmeter.adapters.SectionsPagerAdapter
+import com.aaron.runningmeter.databinding.ActivityMainBinding
+import com.aaron.runningmeter.services.LocationService
 import com.google.android.gms.ads.MobileAds
+import com.google.android.material.tabs.TabLayout
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,7 +36,13 @@ class MainActivity : AppCompatActivity() {
 
         val tabs: TabLayout = binding.tabs
         tabs.setupWithViewPager(viewPager)
-        //println(100/0)
+    }
 
+    override fun onBackPressed() {
+        if (LocationService.isAttached){
+            Toast.makeText(this,getString(R.string.in_record),Toast.LENGTH_LONG).show()
+        } else {
+            super.onBackPressed()
+        }
     }
 }

@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.databinding.MapFragmentBinding
 import com.aaron.runningmeter.extensions.showLocationPermissionDialog
@@ -210,15 +211,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onResume() {
         super.onResume()
         activity?.let {
-            it.registerReceiver(broadCastReceiver, IntentFilter(Globals.NEW_LOCATION_INTENT_FILTER))
-            it.registerReceiver(broadCastReceiver, IntentFilter(Globals.TIME_INTENT_FILTER))
+            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadCastReceiver, IntentFilter(Globals.NEW_LOCATION_INTENT_FILTER))
+            LocalBroadcastManager.getInstance(requireContext()).registerReceiver(broadCastReceiver, IntentFilter(Globals.TIME_INTENT_FILTER))
         }
     }
 
     override fun onPause() {
         super.onPause()
         activity?.let {
-            it.unregisterReceiver(broadCastReceiver)
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadCastReceiver)
         }
     }
     private fun prepareLocationService() {
@@ -305,7 +306,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         try {
             disconnectLocationService()
             activity?.let {
-                it.unregisterReceiver(broadCastReceiver)
+                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(broadCastReceiver)
             }
         } catch (e: Exception) {
             e.printStackTrace()

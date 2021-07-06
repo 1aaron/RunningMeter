@@ -19,4 +19,5 @@
     <string name="location_permission">Para usar esta aplicación en segundo plano necesitamos acceder a la información del GPS mientras se está en ese estado, por favor seleccione "Permitir siempre" en el diálogo de permiso.</string>
     <string name="accept_permisses">Acepta los permisos</string>
     <string name="empty_routes_text">No has guardado rutas aún.</string>
+    <string name="in_record">En captura</string>
 </resources>

@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.annotation.RequiresApi
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
@@ -34,6 +35,10 @@ class LocationService: Service() {
         return binder
     }
 
+    companion object {
+        var isAttached = false
+    }
+
     override fun onCreate() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -42,7 +47,7 @@ class LocationService: Service() {
                 locations.add(loc)
                 val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
                 intent.putExtra(Globals.LOCATION_INTENT_KEY, locations)
-                sendBroadcast(intent)
+                LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
             }
         }
     }
@@ -61,7 +66,7 @@ class LocationService: Service() {
                 seconds += 1
                 val intent = Intent(Globals.TIME_INTENT_FILTER)
                 intent.putExtra(Globals.TIMER_KEY, seconds)
-                sendBroadcast(intent)
+                LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
             }
         }
     }
@@ -71,6 +76,7 @@ class LocationService: Service() {
         startTimer()
         try {
             locationClient?.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            isAttached = true
         } catch (ex: SecurityException) {
             // Log.i(TAG, "fail to request location update, ignore", ex);
         } catch (ex: IllegalArgumentException) {
@@ -82,12 +88,13 @@ class LocationService: Service() {
         stopped = true
         val intent = Intent(Globals.TIME_INTENT_FILTER)
         intent.putExtra(Globals.TIMER_KEY, seconds)
-        sendBroadcast(intent)
+        LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
     }
 
     override fun onDestroy() {
         locationClient?.removeLocationUpdates(locationCallback)
         stopForeground(true)
+        isAttached = false
         super.onDestroy()
     }
 
