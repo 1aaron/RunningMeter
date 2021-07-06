@@ -60,7 +60,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         val adRequest = AdRequest.Builder().build()
         //TODO: Change this id for test or real one
-        InterstitialAd.load(requireContext(),Globals.TEST_ANNOUNCEMENT_ID,adRequest, object : InterstitialAdLoadCallback() {
+        InterstitialAd.load(requireContext(),Globals.ANNOUNCEMENT_ID,adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 Log.d(TAG, adError.message)
                 mInterstitialAd = null
@@ -97,6 +97,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         return binder.root
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -112,6 +113,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     //TODO: until here
                     mInterstitialAd?.show(requireActivity())
                     gMap.clear()
+                    gMap.isMyLocationEnabled = true
                     val locationManager: LocationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                         prepareLocationService()
@@ -343,7 +345,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
-        map.isMyLocationEnabled = true
         gMap = map
     }
 
