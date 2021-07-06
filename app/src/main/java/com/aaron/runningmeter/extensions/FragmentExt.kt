@@ -10,8 +10,8 @@ fun Fragment.showLocationPermissionDialog(acceptAction: () -> Unit) {
         setView(dialogView.root)
     }.create()
     dialogView.acceptButton.setOnClickListener {
-        dialog.dismiss()
         acceptAction()
+        dialog.dismiss()
     }
     dialog.show()
 }

@@ -231,31 +231,36 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun verifyPermissionStatus(): Boolean {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PERMISSION_DENIED
+        return if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PERMISSION_DENIED
             || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
             if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 showLocationPermissionDialog() {
                     askLocationPermissions()
                 }
-                return false
             } else {
                 askLocationPermissions()
-                return false
             }
+            false
         } else {
-            return true
+            true
         }
-        /*if (!viewModel.reviewPermissions()) {
-            requestPermissions(Globals.PERMISSIONS_TO_ASK,PERMISSIONS_CHECK_CODE)
-            return false
-        }*/
     }
 
     private fun askLocationPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
-        } else {
-            requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
+                if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_DENIED
+                    || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
+                    requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                } else
+                    requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+            }
+            else -> {
+                requestPermissionsLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+            }
         }
     }
 
@@ -327,9 +332,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (verifyPermissionStatus()) {
-            binder.fab.performClick()
-        }
+        if (requestCode != 3)
+            if (verifyPermissionStatus()) {
+                binder.fab.performClick()
+            }
     }
 
     override fun onMapReady(map: GoogleMap) {
