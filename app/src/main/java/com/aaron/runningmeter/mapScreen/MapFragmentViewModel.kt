@@ -45,6 +45,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     private val _index = MutableLiveData<Int>()
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
+    private var currentPosMarker: Marker? = null
 
     override var locations = arrayListOf<Location>()
     override var stoppedTag = "STOPPED"
@@ -62,6 +63,12 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
         inMap.clear()
         inMap.addPolyline(polilyne)
         inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastPoint,18f))
+
+        currentPosMarker?.remove()
+        val currentMarker = MarkerOptions()
+        currentMarker.position(LatLng(locations.last().latitude, locations.last().longitude))
+        currentMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
+        inMap.addMarker(currentMarker)
     }
 
     override fun reviewPermissions(): Boolean {

@@ -1,6 +1,7 @@
 package com.aaron.runningmeter.mapScreen
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
@@ -99,6 +100,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+
         mapView.getMapAsync(this)
         binder.fab.setOnClickListener {
             if (it.tag == viewModel.stoppedTag) {
@@ -339,7 +341,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onMapReady(map: GoogleMap) {
+        map.isMyLocationEnabled = true
         gMap = map
     }
 
