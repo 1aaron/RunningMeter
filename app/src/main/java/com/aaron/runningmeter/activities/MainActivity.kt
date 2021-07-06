@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         val tabs: TabLayout = binding.tabs
         tabs.setupWithViewPager(viewPager)
+        //println(100/0)
 
     }
 }

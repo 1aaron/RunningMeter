@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "360146082512",
+    "project_id": "grain-chain-test",
+    "storage_bucket": "grain-chain-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360146082512:android:f0ac4eb2e9e90cda1edcd5",
+        "android_client_info": {
+          "package_name": "com.aaron.runningmeter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "360146082512-es18obkml51dbnp34sfqthjbbckqrfl8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDa0nt8FgIIod7XnZMoQijQ6OEaVByc3_4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "360146082512-es18obkml51dbnp34sfqthjbbckqrfl8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
