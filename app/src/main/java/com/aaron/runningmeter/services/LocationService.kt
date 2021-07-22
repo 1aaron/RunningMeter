@@ -3,6 +3,7 @@ package com.aaron.runningmeter.services
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.location.Location
@@ -11,7 +12,9 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.aaron.runningmeter.activities.MainActivity
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
@@ -123,15 +126,23 @@ class LocationService: Service() {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private fun getNotification(): Notification? {
+    private fun getNotification(): Notification {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
         val channel =
             NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH)
-        val notificationManager = getSystemService(
+        getSystemService(
             NotificationManager::class.java
-        )
-        notificationManager?.createNotificationChannel(channel)
-        val builder: Notification.Builder =
-            Notification.Builder(applicationContext, channelID).setAutoCancel(true)
+        ).apply {
+            createNotificationChannel(channel)
+        }
+        val builder: NotificationCompat.Builder =
+            NotificationCompat.Builder(applicationContext, channelID)
+        builder.apply {
+            setContentIntent(pendingIntent)
+        }
         return builder.build()
     }
 

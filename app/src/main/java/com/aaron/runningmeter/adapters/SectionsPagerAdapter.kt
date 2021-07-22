@@ -18,12 +18,11 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager)
 
     private val tabAmount = 2
     override fun getItem(position: Int): Fragment {
-        val fragment = if (position == 0) {
-            MapFragment.getInstance()
+        return if (position == 0) {
+            MapFragment()
         } else {
-            BaseFragment.getInstance()
+            BaseFragment()
         }
-        return fragment
     }
 
     override fun getPageTitle(position: Int): CharSequence? {

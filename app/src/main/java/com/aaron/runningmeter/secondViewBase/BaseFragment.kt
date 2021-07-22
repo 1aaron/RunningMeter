@@ -11,21 +11,11 @@ import com.aaron.runningmeter.databinding.FragmentBaseBinding
 
 class BaseFragment : Fragment() {
     private lateinit var binder: FragmentBaseBinding
-    companion object {
-        private var INSTANCE: BaseFragment? = null
-
-        @JvmStatic
-        fun getInstance(): BaseFragment {
-            return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: BaseFragment().also { INSTANCE = it }
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.supportFragmentManager?.beginTransaction()
-            ?.replace(R.id.content_main, ListFragment.getInstance())
+            ?.replace(R.id.content_main, ListFragment())
             ?.commit()
     }
 

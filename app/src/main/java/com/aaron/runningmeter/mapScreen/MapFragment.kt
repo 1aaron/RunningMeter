@@ -103,6 +103,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
 
         mapView.getMapAsync(this)
+        if (LocationService.isAttached)
+            setTrackingState()
         binder.fab.setOnClickListener {
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
@@ -230,7 +232,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         activity?.let {
             val application = it.application
             val gpsIntent = Intent(application, LocationService::class.java)
-            application.startService(gpsIntent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                requireActivity().startForegroundService(gpsIntent)
+            } else {
+                requireActivity().startService(gpsIntent)
+            }
             application.bindService(gpsIntent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }
@@ -316,20 +322,6 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             e.printStackTrace()
         }
         super.onDestroy()
-    }
-
-    companion object {
-        private var INSTANCE: MapFragment? = null
-
-        @JvmStatic
-        fun getInstance(): MapFragment {
-            return INSTANCE
-                ?: synchronized(this) {
-                INSTANCE
-                    ?: MapFragment()
-                        .also { INSTANCE = it }
-            }
-        }
     }
 
     override fun onRequestPermissionsResult(

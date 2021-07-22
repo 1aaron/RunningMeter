@@ -1,7 +1,5 @@
 package com.aaron.runningmeter.activities
 
-import android.app.ActivityManager
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast

@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aaron.runningmeter.R
@@ -15,18 +14,6 @@ import com.aaron.runningmeter.detailScreen.DetailScreenFragment
 import com.aaron.runningmeter.models.Route
 
 class ListFragment : Fragment() {
-
-    companion object {
-        private var INSTANCE: ListFragment? = null
-
-        @JvmStatic
-        fun getInstance(): ListFragment {
-            return INSTANCE ?: synchronized(this) {
-                    INSTANCE ?: ListFragment().also { INSTANCE = it }
-                }
-        }
-    }
-
     private lateinit var viewModel: ListFragmentViewModelInterface
     private lateinit var binder: ListFragmentBinding
     var recyclerAdapter: ListAdapter? = null
