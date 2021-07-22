@@ -18,8 +18,8 @@ android {
         applicationId "com.aaron.runningmeter"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 3
-        versionName "0.82"
+        versionCode 4
+        versionName "0.83"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
