@@ -17,6 +17,9 @@ interface LocationsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addLocation(locations: Locations): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addLocations(locations: ArrayList<Locations>)
+
     @Delete
     suspend fun deleteLocations(location: Locations)
 

@@ -22,6 +22,9 @@ interface RouteDao {
     @Delete
     suspend fun deleteRoute(route: Route)
 
+    @Update
+    suspend fun updateRoute(route: Route)
+
     @Query("SELECT * FROM Route ORDER BY id DESC")
     fun getAllRoutes(): LiveData<List<Route>>
 }

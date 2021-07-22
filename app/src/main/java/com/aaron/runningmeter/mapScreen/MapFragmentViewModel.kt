@@ -13,9 +13,6 @@ import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Locations
@@ -43,8 +40,6 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
 
     private val myApp = application
     private val _index = MutableLiveData<Int>()
-    private var viewModelJob = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
     private var currentPosMarker: Marker? = null
 
     override var locations = arrayListOf<Location>()
@@ -88,12 +83,16 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     override fun saveRoute(alias: String, completion: () -> Unit) {
-        uiScope.launch {
+        viewModelScope.launch {
             val db = GCTestDB.getAppDataBase(myApp.applicationContext)
             var distance = 0.0
+            val route = Route(0,alias,distance,seconds,dateFormatter.format(Date()),0.0)
+            route.id = db.routeDao().addRoute(route)
+            val locationsToSave = arrayListOf(Locations(0,route.id,locations[0].latitude,locations[0].longitude))
             for(x in 1 until locations.size) {
                 val beginLocation = locations[x - 1]
                 val endLocation = locations[x]
+                locationsToSave.add(Locations(0,route.id,endLocation.latitude,endLocation.longitude))
                 distance += beginLocation.distanceTo(endLocation)
             }
             distance /= 1000
@@ -101,12 +100,9 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             df.roundingMode = RoundingMode.CEILING
             distance = df.format(distance).toDouble()
             //TODO: future updates -> calculate speed
-            val route = Route(0,alias,distance,seconds,dateFormatter.format(Date()),0.0)
-            val idInserted = db.routeDao().addRoute(route)
-            for (location in locations) {
-                val loToSave = Locations(0,idInserted,location.latitude,location.longitude)
-                db.locationsDao().addLocation(loToSave)
-            }
+            route.distance = distance
+            db.routeDao().updateRoute(route)
+            db.locationsDao().addLocations(locationsToSave)
             completion()
         }
     }
@@ -117,6 +113,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
             var finishMarker = MarkerOptions()
             val initialLoc = locations.first()
             val lastLoc = locations.last()
+            currentPosMarker?.remove()
             initialMarker.position(LatLng(initialLoc.latitude, initialLoc.longitude))
             initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
             map.addMarker(initialMarker)

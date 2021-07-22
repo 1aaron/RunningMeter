@@ -108,11 +108,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         binder.fab.setOnClickListener {
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
+                    /*
                     //TODO: remove when uploading
                     val testDeviceIds = listOf("FA681621979806E37E3B213A1F514285")
                     val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
                     MobileAds.setRequestConfiguration(configuration)
                     //TODO: until here
+                    */
                     mInterstitialAd?.show(requireActivity())
                     gMap.clear()
                     gMap.isMyLocationEnabled = true
