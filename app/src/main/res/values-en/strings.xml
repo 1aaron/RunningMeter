@@ -17,7 +17,7 @@
     <string name="shareImage">Share image</string>
     <string name="saving">Saving...</string>
     <string name="continue_text">Continuar</string>
-    <string name="location_permission">In order to use this app in background we need to access your gps information while in this state, so please click "allow all the time" in location permission prompt.</string>
+    <string name="location_permission">In order to use this app we need to access your gps information all the time to keep track even in background and to give accurate information about your route at every moment, so please click "allow all the time" in location permission prompt.</string>
     <string name="accept_permisses">Acepta los permisos</string>
     <string name="empty_routes_text">You don\'t have saved routes yet.</string>
     <string name="in_record">In record</string>

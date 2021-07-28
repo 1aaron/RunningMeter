@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+//apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion "29.0.3"
-    viewBinding.enabled = true
+    //viewBinding.enabled = true
     buildFeatures {
         viewBinding true
         dataBinding true
@@ -18,7 +17,7 @@ android {
         applicationId "com.aaron.runningmeter"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 4
+        versionCode 5
         versionName "0.83"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

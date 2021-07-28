@@ -16,7 +16,7 @@
     <string name="shareImage">Compartir imágen</string>
     <string name="saving">Guardando…</string>
     <string name="continue_text">Continuar</string>
-    <string name="location_permission">Para usar esta aplicación en segundo plano necesitamos acceder a la información del GPS mientras se está en ese estado, por favor seleccione "Permitir siempre" en el diálogo de permiso.</string>
+    <string name="location_permission">Para usar esta aplicación necesitamos acceder a la información del GPS en todo momento para poder obtener la posicion en segundo plano y para poder proveer los datos precisos del recorrido en todo momento, por favor seleccione "Permitir siempre" en el diálogo de permiso.</string>
     <string name="accept_permisses">Acepta los permisos</string>
     <string name="empty_routes_text">No has guardado rutas aún.</string>
     <string name="in_record">En captura</string>
