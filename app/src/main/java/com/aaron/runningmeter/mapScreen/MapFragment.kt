@@ -54,38 +54,45 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var gMap: GoogleMap
     val PERMISSIONS_CHECK_CODE = 1
     private var mInterstitialAd: InterstitialAd? = null
-    private final var TAG = "MapFragment"
+    private val CLASS_TAG = "MapFragment"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
+    }
+
+    private fun loadAdd() {
         val adRequest = AdRequest.Builder().build()
         //TODO: Change this id for test or real one
         InterstitialAd.load(requireContext(),Globals.ANNOUNCEMENT_ID,adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d(TAG, adError.message)
+                Log.e(CLASS_TAG, adError.message)
                 mInterstitialAd = null
             }
 
             override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                Log.d(TAG, "Ad was loaded.")
+                Log.e(CLASS_TAG, "Ad was loaded.")
                 mInterstitialAd = interstitialAd
+                setListeners()
             }
         })
+    }
+
+    private fun setListeners() {
         mInterstitialAd?.fullScreenContentCallback = object: FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
-                Log.d(TAG, "Ad was dismissed.")
+                Log.e(CLASS_TAG, "Ad was dismissed.")
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
-                Log.d(TAG, "Ad failed to show.")
+                Log.e(CLASS_TAG, "Ad failed to show.")
             }
 
             override fun onAdShowedFullScreenContent() {
-                Log.d(TAG, "Ad showed fullscreen content.")
+                Log.e(CLASS_TAG, "Ad showed fullscreen content.")
                 mInterstitialAd = null
             }
         }
-        viewModel = ViewModelProvider(this).get(MapFragmentViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -115,7 +122,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                     MobileAds.setRequestConfiguration(configuration)
                     //TODO: until here
                     */
-                    mInterstitialAd?.show(requireActivity())
+                    loadAdd()
                     gMap.clear()
                     gMap.isMyLocationEnabled = true
                     val locationManager: LocationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -361,11 +368,11 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         ) { permissionResults ->
             var accepted = true
            for ((key, value) in permissionResults) {
-               Log.e(TAG, key)
+               Log.e(CLASS_TAG, key)
                if (!value) accepted = value
            }
             if (accepted) {
-                Log.e(TAG,"permissions accepted")
+                Log.e(CLASS_TAG,"permissions accepted")
             } else {
                 Toast.makeText(requireContext(),getString(R.string.accept_permisses),Toast.LENGTH_SHORT).show()
             }
