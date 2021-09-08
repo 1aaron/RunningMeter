@@ -25,6 +25,12 @@ interface RouteDao {
     @Update
     suspend fun updateRoute(route: Route)
 
+    @Query("UPDATE Route SET time = :time, distance = :distance, speed = :speed WHERE id = :id")
+    suspend fun updateValues(id: Long, time: Int?, distance: Double?, speed: Double?): Int
+
+    @Query("UPDATE Route SET date = :date, alias = :alias WHERE id = :id")
+    suspend fun updateValues(id: Long, date: String?, alias: String?): Int
+
     @Query("SELECT * FROM Route ORDER BY id DESC")
     fun getAllRoutes(): LiveData<List<Route>>
 }

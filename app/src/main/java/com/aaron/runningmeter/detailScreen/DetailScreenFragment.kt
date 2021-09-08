@@ -17,7 +17,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import java.io.OutputStream
-
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
 
@@ -30,6 +31,10 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View? {
         binder = DetailScreenFragmentBinding.inflate(inflater)
+        route.distance = route.distance?.div(1000)
+        val df = DecimalFormat("#.###")
+        df.roundingMode = RoundingMode.CEILING
+        route.distance = df.format(route.distance).toDouble()
         binder.apply {
             route = this@DetailScreenFragment.route
             lifecycleOwner = viewLifecycleOwner
@@ -46,7 +51,16 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
         var reminder = (route.time ?: 1) % 3600
         val minutes = reminder / 60
         reminder %= 60
-        binder.txtTime.text = getString(R.string.timeData,"$hours:$minutes:$reminder")
+        binder.txtTime.text = getString(R.string.timeData, getTimeStamp())
+        //binder.txtTime.text = getString(R.string.timeData,"$hours:$minutes:$reminder")
+    }
+
+    private fun getTimeStamp(): String {
+        val hours: Int = (route.time)?.div(3600) ?: 0
+        var reminder = (route.time)?.rem(3600)
+        val minutes = reminder?.div(60)
+        reminder = reminder?.rem(60)
+        return "${String.format("%02d",hours)}:${String.format("%02d",minutes)}:${String.format("%02d",reminder)}"
     }
 
     private fun shareImage(image: Bitmap) {

@@ -11,10 +11,13 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aaron.runningmeter.activities.MainActivity
+import com.aaron.runningmeter.models.GCTestDB
+import com.aaron.runningmeter.models.Locations
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
@@ -29,11 +32,14 @@ class LocationService: Service() {
     private var locationClient: FusedLocationProviderClient? = null
     private lateinit var locationCallback: LocationCallback
     private val binder = LocationServiceBinder()
-    private var locations = arrayListOf<Location>()
     private var job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
     var stopped = true
     var seconds = 0
+    private var routeId: Long = 0
+    var distance = 0.0
+    private var lastLocation: Location? = null
+
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
@@ -47,12 +53,27 @@ class LocationService: Service() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
                 val loc = locationResult.lastLocation
-                locations.add(loc)
+                calculateDistance(loc)
                 val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
-                intent.putExtra(Globals.LOCATION_INTENT_KEY, locations)
+                intent.putExtra(Globals.LOCATION_INTENT_KEY, loc)
+                val db = GCTestDB.getAppDataBase(applicationContext)
+                uiScope.launch {
+                    val locationToSave = Locations(0,routeId,loc.latitude,loc.longitude)
+                    db.locationsDao().addLocation(locationToSave)
+                    db.routeDao().updateValues(id = routeId,distance = distance, time = seconds, speed = 0.0)
+                }
                 LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
             }
         }
+    }
+
+    private fun calculateDistance(newLocation: Location) {
+        var distanceCalculating = 0.0
+        lastLocation?.let {
+            distanceCalculating = it.distanceTo(newLocation).toDouble()
+            distance += distanceCalculating
+        }
+        lastLocation = newLocation
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -74,7 +95,9 @@ class LocationService: Service() {
         }
     }
 
-    fun startTracking() {
+    fun startTracking(routeId: Long) {
+        this.routeId = routeId
+        distance = 0.0
         initializeLocationManager()
         startTimer()
         try {
@@ -107,7 +130,6 @@ class LocationService: Service() {
     }
 
     private fun initializeLocationManager() {
-        locations.clear()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForeground(NOTIFICATION_ID,getNotification())
         }

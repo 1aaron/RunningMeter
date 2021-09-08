@@ -20,12 +20,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aaron.runningmeter.BuildConfig
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.databinding.MapFragmentBinding
 import com.aaron.runningmeter.extensions.showLocationPermissionDialog
+import com.aaron.runningmeter.models.GCTestDB
+import com.aaron.runningmeter.models.Locations
 import com.aaron.runningmeter.services.LocationService
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.ads.AdError
@@ -43,6 +46,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.tasks.Task
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.Date
 
 /**
@@ -50,13 +55,28 @@ import java.util.Date
  */
 class MapFragment : Fragment(), OnMapReadyCallback {
 
-    private lateinit var viewModel: MapFragmentViewModelInterface
+    private lateinit var viewModel: MapFragmentViewModel
     private lateinit var binder: MapFragmentBinding
     private var gpsService: LocationService? = null
     private lateinit var gMap: GoogleMap
     val PERMISSIONS_CHECK_CODE = 1
     private var mInterstitialAd: InterstitialAd? = null
     private val CLASS_TAG = "MapFragment"
+    private var dbObserver = Observer<List<Locations>> { liveLocations ->
+        if (liveLocations.isNotEmpty()) {
+            if(liveLocations.first().routeId == viewModel.currentRoute?.id) {
+                viewModel.paintRoute(inMap = gMap, locations = liveLocations)
+                var gotDistance = gpsService?.distance ?: 0.0
+                if (gotDistance > 0) {
+                    gotDistance /= 1000
+                }
+                val df = DecimalFormat("#.###")
+                df.roundingMode = RoundingMode.CEILING
+                gotDistance = df.format(gotDistance).toDouble()
+                binder.txtDistance.text = getString(R.string.distance, gotDistance.toString())
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -290,8 +310,10 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             if (name.endsWith("LocationService")) {
                 gpsService = (service as LocationService.LocationServiceBinder).getService()
                 viewModel.clearData()
-                viewModel.initRoute()
-                gpsService?.startTracking()
+                viewModel.initRoute {
+                    initLocationsListener()
+                    gpsService?.startTracking(viewModel.currentRoute!!.id)
+                }
             }
         }
 
@@ -306,12 +328,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     private val broadCastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Globals.NEW_LOCATION_INTENT_FILTER) {
-                intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let {
-                    val locations = it as ArrayList<Location>
-                    viewModel.locations = locations
-                }
-                viewModel.paintRoute(inMap = gMap)
-                binder.txtDistance.text = getString(R.string.distance, viewModel.getDistance().toString())
+                intent.extras?.get(Globals.LOCATION_INTENT_KEY)?.let { }
             }
             if (intent.action == Globals.TIME_INTENT_FILTER) {
                 intent.extras?.get(Globals.TIMER_KEY)?.let {
@@ -379,4 +396,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 Toast.makeText(requireContext(),getString(R.string.accept_permisses),Toast.LENGTH_SHORT).show()
             }
         }
+
+    private fun initLocationsListener() {
+        val db = GCTestDB.getAppDataBase(requireContext())
+        db.locationsDao().getLiveLocationsForRoute(viewModel.currentRoute!!.id).observe(this,dbObserver)
+    }
 }

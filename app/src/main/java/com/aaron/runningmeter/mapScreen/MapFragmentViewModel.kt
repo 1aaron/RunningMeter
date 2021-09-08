@@ -1,16 +1,12 @@
 package com.aaron.runningmeter.mapScreen
 
 import android.app.Application
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import android.os.Build
 import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.aaron.runningmeter.models.GCTestDB
 import com.aaron.runningmeter.models.Route
-import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
@@ -25,149 +21,93 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-interface MapFragmentViewModelInterface {
-    var locations: ArrayList<Location>
-    var stoppedTag: String
-    var runningTag: String
-    var polilyne: PolylineOptions
-    var seconds: Int
-    val shortDateFormatter: SimpleDateFormat
-    fun reviewPermissions(): Boolean
-    fun clearData()
-    fun paintRoute(inMap: GoogleMap)
-    fun initRoute()
-    fun saveRoute(alias: String, completion: () -> Unit)
-    fun setMarkers(map: GoogleMap)
-    fun getDistance(): Double
-    fun getTimeStamp(): String
-}
+class MapFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
-class MapFragmentViewModel(application: Application) : AndroidViewModel(application), MapFragmentViewModelInterface {
+     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+     val shortDateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+     private val myApp = application
+     private var currentPosMarker: Marker? = null
+     private var lastLocation: Location? = null
 
-    private val myApp = application
-    private val _index = MutableLiveData<Int>()
-    private var currentPosMarker: Marker? = null
+     var stoppedTag = "STOPPED"
+     var runningTag = "RUNNING"
+     private var polilyne = PolylineOptions().color(Color.BLUE)
+     var seconds = 0
+     var distance = 0.0
 
-    override var locations = arrayListOf<Location>()
-    override var stoppedTag = "STOPPED"
-    override var runningTag = "RUNNING"
-    override var polilyne = PolylineOptions().color(Color.BLUE)
-    override var seconds = 0
-    private val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-    override val shortDateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    var currentRoute: Route? = null
 
-    private var currentRoute: Route? = null
-
-    override fun clearData() {
+    fun clearData() {
+        lastLocation = null
         currentRoute = null
-        polilyne = PolylineOptions().color(Color.BLUE)
+        polilyne.points.clear()
+        distance = 0.0
+        seconds = 0
     }
 
-    override fun paintRoute(inMap: GoogleMap) {
-        if(locations.isEmpty())
+    fun paintRoute(inMap: GoogleMap, locations: List<Locations>) {
+        if (locations.isEmpty())
             return
-        val lastPoint = locations.last()
-        polilyne.add(LatLng(lastPoint.latitude,lastPoint.longitude))
+        polilyne.points.clear()
+        val lastLocation = locations.last()
+        locations.forEach { polilyne.add(LatLng(it.latitude,it.longitude)) }
         inMap.clear()
         inMap.addPolyline(polilyne)
         inMap.moveCamera(CameraUpdateFactory.newLatLngZoom(polilyne.points.last(),18f))
 
         currentPosMarker?.remove()
         val currentMarker = MarkerOptions()
-        currentMarker.position(LatLng(lastPoint.latitude, lastPoint.longitude))
+        currentMarker.position(LatLng(lastLocation.latitude, lastLocation.longitude))
         currentMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
-        inMap.addMarker(currentMarker)
+        currentPosMarker = inMap.addMarker(currentMarker)
     }
 
-    override fun reviewPermissions(): Boolean {
-        var permissionsAccepted = true
-        var permissionsToCheck = Globals.PERMISSIONS_TO_ASK.copyOf()
-        if (Build.VERSION.SDK_INT < 29)
-            permissionsToCheck = permissionsToCheck.dropLast(1).toTypedArray()
-        if (Build.VERSION.SDK_INT < 28)
-            permissionsToCheck = permissionsToCheck.dropLast(1).toTypedArray()
-        for (permission in permissionsToCheck) {
-            if (ContextCompat.checkSelfPermission(myApp, permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsAccepted = false
-                return permissionsAccepted
-            }
-        }
-        return permissionsAccepted
-    }
-
-    override fun saveRoute(alias: String, completion: () -> Unit) {
+    fun saveRoute(alias: String, completion: () -> Unit) {
         viewModelScope.launch {
             val db = GCTestDB.getAppDataBase(myApp.applicationContext)
-            var distance = 0.0
-            currentRoute.apply {
-                this?.alias = alias
-                this?.distance = distance
-                this?.time = seconds
-                this?.date = dateFormatter.format(Date())
-            }
-            val locationsToSave = arrayListOf(Locations(0,currentRoute!!.id,locations[0].latitude,locations[0].longitude))
-            for(x in 1 until locations.size) {
-                val beginLocation = locations[x - 1]
-                val endLocation = locations[x]
-                locationsToSave.add(Locations(0,currentRoute!!.id,endLocation.latitude,endLocation.longitude))
-                distance += beginLocation.distanceTo(endLocation)
-            }
-            distance /= 1000
-            val df = DecimalFormat("#.###")
-            df.roundingMode = RoundingMode.CEILING
-            distance = df.format(distance).toDouble()
             //TODO: future updates -> calculate speed
-            currentRoute?.distance = distance
-            db.routeDao().updateRoute(currentRoute!!)
-            db.locationsDao().addLocations(locationsToSave)
+            db.routeDao().updateValues(currentRoute!!.id,dateFormatter.format(Date()),alias)
             completion()
         }
     }
 
-    override fun initRoute() {
+    fun initRoute(completion: () -> Unit) {
         val db = GCTestDB.getAppDataBase(myApp.applicationContext)
-        val route = Route(0,"",0.0,0,dateFormatter.format(Date()),0.0)
+        val route = Route(0,dateFormatter.format(Date()),0.0,0,dateFormatter.format(Date()),0.0)
         viewModelScope.launch(Dispatchers.IO) {
             route.id = db.routeDao().addRoute(route)
             withContext(Dispatchers.Main) {
                 Log.e("mapVM","roteID: ${route.id}")
                 currentRoute = route
+                completion()
             }
         }
     }
 
-    override fun setMarkers(map: GoogleMap) {
-        if (locations.isNotEmpty()) {
-            var initialMarker = MarkerOptions()
-            var finishMarker = MarkerOptions()
-            val initialLoc = locations.first()
-            val lastLoc = locations.last()
-            currentPosMarker?.remove()
-            initialMarker.position(LatLng(initialLoc.latitude, initialLoc.longitude))
-            initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
-            map.addMarker(initialMarker)
+    fun setMarkers(map: GoogleMap) {
+        val db = GCTestDB.getAppDataBase(myApp.applicationContext)
+        viewModelScope.launch {
+            val locations = db.locationsDao().getLocationsForRoute(currentRoute!!.id)
+            if (locations.isNotEmpty()) {
+                val initialMarker = MarkerOptions()
+                val finishMarker = MarkerOptions()
+                val initialLoc = locations.first()
+                val lastLoc = locations.last()
+                currentPosMarker?.remove()
+                initialMarker.position(LatLng(initialLoc.latitude, initialLoc.longitude))
+                initialMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)))
 
-            finishMarker.position(LatLng(lastLoc.latitude, lastLoc.longitude))
-            finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
-            map.addMarker(finishMarker)
+                finishMarker.position(LatLng(lastLoc.latitude, lastLoc.longitude))
+                finishMarker.icon((BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)))
+                withContext(Dispatchers.Main) {
+                    map.addMarker(initialMarker)
+                    map.addMarker(finishMarker)
+                }
+            }
         }
     }
 
-    override fun getDistance(): Double {
-        var distance = 0.0
-        for(x in 1 until locations.size) {
-            val beginLocation = locations[x - 1]
-            val endLocation = locations[x]
-            distance += beginLocation.distanceTo(endLocation)
-        }
-        distance /= 1000
-        val df = DecimalFormat("#.###")
-        df.roundingMode = RoundingMode.CEILING
-        distance = df.format(distance).toDouble()
-        return distance
-    }
-
-    override fun getTimeStamp(): String {
+    fun getTimeStamp(): String {
         val hours: Int = (seconds) / 3600
         var reminder = (seconds) % 3600
         val minutes = reminder / 60
