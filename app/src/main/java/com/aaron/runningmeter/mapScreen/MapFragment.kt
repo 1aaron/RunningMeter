@@ -289,6 +289,8 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             val name = className.className
             if (name.endsWith("LocationService")) {
                 gpsService = (service as LocationService.LocationServiceBinder).getService()
+                viewModel.clearData()
+                viewModel.initRoute()
                 gpsService?.startTracking()
             }
         }
