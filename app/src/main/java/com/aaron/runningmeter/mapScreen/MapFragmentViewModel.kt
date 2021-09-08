@@ -28,6 +28,7 @@ interface MapFragmentViewModelInterface {
     var runningTag: String
     var polilyne: PolylineOptions
     var seconds: Int
+    val shortDateFormatter: SimpleDateFormat
     fun reviewPermissions(): Boolean
     fun paintRoute(inMap: GoogleMap)
     fun saveRoute(alias: String, completion: () -> Unit)
@@ -48,6 +49,7 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     override var polilyne = PolylineOptions()
     override var seconds = 0
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+    override val shortDateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     override fun paintRoute(inMap: GoogleMap) {
         polilyne = PolylineOptions().color(Color.BLUE)

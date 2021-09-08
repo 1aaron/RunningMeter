@@ -22,6 +22,7 @@ import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.aaron.runningmeter.BuildConfig
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.databinding.MapFragmentBinding
 import com.aaron.runningmeter.extensions.showLocationPermissionDialog
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.tasks.Task
+import java.util.Date
 
 /**
  * A placeholder fragment containing a simple view.
@@ -63,8 +65,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun loadAdd() {
         val adRequest = AdRequest.Builder().build()
-        //TODO: Change this id for test or real one
-        InterstitialAd.load(requireContext(),Globals.ANNOUNCEMENT_ID,adRequest, object : InterstitialAdLoadCallback() {
+        InterstitialAd.load(requireContext(),getString(R.string.announcement_id),adRequest, object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 Log.e(CLASS_TAG, adError.message)
                 mInterstitialAd = null
@@ -112,16 +113,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mapView.getMapAsync(this)
         if (LocationService.isAttached)
             setTrackingState()
+        binder.txtDate.text = getString(R.string.dateData,viewModel.shortDateFormatter.format(Date()))
         binder.fab.setOnClickListener {
             if (it.tag == viewModel.stoppedTag) {
                 if (verifyPermissionStatus()) {
-                    /*
-                    //TODO: remove when uploading
-                    val testDeviceIds = listOf("FA681621979806E37E3B213A1F514285")
-                    val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-                    MobileAds.setRequestConfiguration(configuration)
-                    //TODO: until here
-                    */
+                    if (BuildConfig.BUILD_TYPE == "debug") {
+                        val testDeviceIds = listOf("FA681621979806E37E3B213A1F514285")
+                        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+                        MobileAds.setRequestConfiguration(configuration)
+                    }
                     loadAdd()
                     gMap.clear()
                     gMap.isMyLocationEnabled = true

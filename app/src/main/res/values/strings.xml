@@ -13,6 +13,7 @@
     <string name="nameDialogTitle">Elige nombre de ruta</string>
     <string name="save">Guardar</string>
     <string name="timeData">Tiempo: %s</string>
+    <string name="dateData">Fecha: %s</string>
     <string name="shareImage">Compartir imágen</string>
     <string name="saving">Guardando…</string>
     <string name="continue_text">Continuar</string>
