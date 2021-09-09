@@ -271,8 +271,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun verifyPermissionStatus(): Boolean {
-        return if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PERMISSION_DENIED
-            || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
+        return if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
             if(shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 showLocationPermissionDialog() {
                     askLocationPermissions()
