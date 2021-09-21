@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
-import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle

@@ -11,6 +11,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -20,6 +21,9 @@ import com.aaron.runningmeter.models.Locations
 import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.location.*
 import kotlinx.coroutines.*
+import java.util.Timer
+import java.util.TimerTask
+import kotlin.concurrent.schedule
 
 class LocationService: Service() {
     private val locationinterval: Long = 2000
@@ -33,11 +37,11 @@ class LocationService: Service() {
     private val binder = LocationServiceBinder()
     private var job = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + job)
-    var stopped = true
     var seconds = 0
     private var routeId: Long = 0
     var distance = 0.0
     private var lastLocation: Location? = null
+    private var timer: TimerTask? = null
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
@@ -76,22 +80,18 @@ class LocationService: Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        super.onStartCommand(intent, flags, startId)
-        return START_STICKY
+        return super.onStartCommand(intent, flags, startId)
     }
 
-    fun startTimer() {
+    private fun startTimer() {
         seconds = 0
-        stopped = false
-        uiScope.launch {
-            while (!stopped) {
-                delay(1000)
-                seconds += 1
-                val intent = Intent(Globals.TIME_INTENT_FILTER)
-                intent.putExtra(Globals.TIMER_KEY, seconds)
-                LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
-            }
+        timer = Timer("timer",true).schedule(1000,1000) {
+            seconds += 1
+            val intent = Intent(Globals.TIME_INTENT_FILTER)
+            intent.putExtra(Globals.TIMER_KEY, seconds)
+            LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
         }
+        timer?.run()
     }
 
     fun startTracking(routeId: Long) {
@@ -109,8 +109,8 @@ class LocationService: Service() {
         }
     }
 
-    fun stopTimer() {
-        stopped = true
+    private fun stopTimer() {
+        timer?.cancel()
         val intent = Intent(Globals.TIME_INTENT_FILTER)
         intent.putExtra(Globals.TIMER_KEY, seconds)
         LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
@@ -119,6 +119,7 @@ class LocationService: Service() {
     override fun onDestroy() {
         locationClient?.removeLocationUpdates(locationCallback)
         stopForeground(true)
+        timer?.cancel()
         isAttached = false
         super.onDestroy()
     }

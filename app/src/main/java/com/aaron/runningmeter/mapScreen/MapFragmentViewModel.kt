@@ -15,8 +15,6 @@ import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Locations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
