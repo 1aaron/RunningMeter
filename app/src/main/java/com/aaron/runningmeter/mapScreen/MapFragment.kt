@@ -69,10 +69,15 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 if (gotDistance > 0) {
                     gotDistance /= 1000
                 }
-                val df = DecimalFormat("#.###")
+                val df = DecimalFormat("#.##")
                 df.roundingMode = RoundingMode.CEILING
+                val hours = viewModel.seconds.toDouble() / 3600f
+                val speed = df.format(gotDistance / hours)
+                println(gotDistance)
+                println(hours)
                 gotDistance = df.format(gotDistance).toDouble()
                 binder.txtDistance.text = getString(R.string.distance, gotDistance.toString())
+                binder.txtSpeed.text = getString(R.string.speed, speed.toString())
             }
         }
     }
@@ -164,6 +169,9 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     fun setTrackingState() {
         binder.fab.tag = viewModel.runningTag
         binder.fab.setImageResource(R.drawable.stop)
+        binder.txtDistance.visibility = View.VISIBLE
+        binder.txtSpeed.visibility = View.VISIBLE
+        binder.txtTime.visibility = View.VISIBLE
         Toast.makeText(context,getString(R.string.beginRoute),Toast.LENGTH_SHORT).show()
     }
 

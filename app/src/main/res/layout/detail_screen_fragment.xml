@@ -26,6 +26,7 @@
                 android:id="@+id/map"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 />
+
             <!--androidx.fragment.app.FragmentContainerView
                 android:id="@+id/map"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -35,6 +36,15 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" /-->
+
+            <ProgressBar
+                android:id="@+id/loader"
+                android:background="#88000000"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="0dp" />
 
             <TextView
                 android:id="@+id/txtRoute"

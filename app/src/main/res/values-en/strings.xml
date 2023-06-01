@@ -9,11 +9,11 @@
     <string name="beginRoute">Begining route</string>
     <string name="share">Share</string>
     <string name="delete">Delete</string>
-    <string name="distance">Distance: %s kms</string>
+    <string name="distance">Distance:\n%s kms</string>
     <string name="routeName">Route: %s</string>
     <string name="nameDialogTitle">Set a name for route</string>
     <string name="save">Save</string>
-    <string name="timeData">Time: %s</string>
+    <string name="timeData">Time:\n%s</string>
     <string name="dateData">Date: %s</string>
     <string name="shareImage">Share image</string>
     <string name="saving">Saving...</string>
@@ -22,4 +22,5 @@
     <string name="accept_permisses">Acepta los permisos</string>
     <string name="empty_routes_text">You don\'t have saved routes yet.</string>
     <string name="in_record">In record</string>
+    <string name="speed">Speed:\n%s km/h</string>
 </resources>

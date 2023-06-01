@@ -44,7 +44,7 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(DetailScreenViewModel::class.java)
+        viewModel = ViewModelProvider(this)[DetailScreenViewModel::class.java]
         val mapView = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapView.getMapAsync(this)
         val hours: Int = (route.time ?: 1) / 3600
@@ -88,7 +88,6 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
                 share.putExtra(Intent.EXTRA_STREAM, uri)
                 startActivity(Intent.createChooser(share, getString(R.string.shareImage)))
             }
-
         }
     }
 
@@ -101,10 +100,14 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
                 }
             }
             binder.btnShare.setOnClickListener {
+                binder.loader.visibility = View.VISIBLE
+                binder.btnShare.isEnabled = false
                 gMap.snapshot { image ->
                     image?.let {
                         shareImage(image)
                     }
+                    binder.loader.visibility = View.GONE
+                    binder.btnShare.isEnabled = true
                 }
             }
         }
