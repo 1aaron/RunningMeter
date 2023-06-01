@@ -104,7 +104,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 Log.e(CLASS_TAG, "Ad was dismissed.")
             }
 
-            override fun onAdFailedToShowFullScreenContent(adError: AdError?) {
+            override fun onAdFailedToShowFullScreenContent(p0: AdError) {
                 Log.e(CLASS_TAG, "Ad failed to show.")
             }
 

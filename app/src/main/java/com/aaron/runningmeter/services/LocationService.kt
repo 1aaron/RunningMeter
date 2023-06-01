@@ -11,7 +11,6 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -53,19 +52,21 @@ class LocationService: Service() {
 
     override fun onCreate() {
         locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                val loc = locationResult.lastLocation
-                calculateDistance(loc)
-                val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
-                intent.putExtra(Globals.LOCATION_INTENT_KEY, loc)
-                val db = GCTestDB.getAppDataBase(applicationContext)
-                uiScope.launch {
-                    val locationToSave = Locations(0,routeId,loc.latitude,loc.longitude)
-                    db.locationsDao().addLocation(locationToSave)
-                    db.routeDao().updateValues(id = routeId,distance = distance, time = seconds, speed = 0.0)
+            override fun onLocationResult(p0: LocationResult) {
+                p0 ?: return
+                val loc = p0.lastLocation
+                loc?.let {
+                    calculateDistance(loc)
+                    val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
+                    intent.putExtra(Globals.LOCATION_INTENT_KEY, loc)
+                    val db = GCTestDB.getAppDataBase(applicationContext)
+                    uiScope.launch {
+                        val locationToSave = Locations(0,routeId,loc.latitude,loc.longitude)
+                        db.locationsDao().addLocation(locationToSave)
+                        db.routeDao().updateValues(id = routeId,distance = distance, time = seconds, speed = 0.0)
+                    }
+                    LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
                 }
-                LocalBroadcastManager.getInstance(this@LocationService).sendBroadcast(intent)
             }
         }
     }
@@ -100,7 +101,7 @@ class LocationService: Service() {
         initializeLocationManager()
         startTimer()
         try {
-            locationClient?.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            locationRequest?.let { locationClient?.requestLocationUpdates(it, locationCallback, Looper.getMainLooper()) }
             isAttached = true
         } catch (ex: SecurityException) {
             // Log.i(TAG, "fail to request location update, ignore", ex);
@@ -118,7 +119,11 @@ class LocationService: Service() {
 
     override fun onDestroy() {
         locationClient?.removeLocationUpdates(locationCallback)
-        stopForeground(true)
+        if (Build.VERSION.SDK_INT > 23) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            stopForeground(true)
+        }
         timer?.cancel()
         isAttached = false
         super.onDestroy()
@@ -140,7 +145,7 @@ class LocationService: Service() {
     }
 
     private fun createLocationRequest(): LocationRequest? {
-        return LocationRequest.create()?.apply {
+        return LocationRequest.create().apply {
             interval = locationinterval
             fastestInterval = fastestLocationInterval
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -151,8 +156,14 @@ class LocationService: Service() {
     private fun getNotification(): Notification {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            setClassName("com.aaron.runningmeter.services","LocationService")
         }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
         val channel =
             NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH)
         getSystemService(
