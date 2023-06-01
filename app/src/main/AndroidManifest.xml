@@ -21,7 +21,11 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4258059828543306~9374391289"/>
-        <service android:name="com.aaron.runningmeter.services.LocationService" android:enabled="true" android:exported="false"/>
+        <service
+            android:name="com.aaron.runningmeter.services.LocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
         <activity
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
