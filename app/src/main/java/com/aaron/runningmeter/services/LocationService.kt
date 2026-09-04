@@ -44,9 +44,10 @@ class LocationService: Service() {
 
     override fun onCreate() {
         locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
+            override fun onLocationResult(locationResult: LocationResult) {
                 locationResult ?: return
-                val loc = locationResult.lastLocation
+                val loc = locationResult.lastLocation!!
+                locations.add(loc)
                 locations.add(loc)
                 val intent = Intent(Globals.NEW_LOCATION_INTENT_FILTER)
                 intent.putExtra(Globals.LOCATION_INTENT_KEY, locations)
@@ -78,7 +79,7 @@ class LocationService: Service() {
         initializeLocationManager()
         startTimer()
         try {
-            locationClient?.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            locationClient?.requestLocationUpdates(locationRequest ?: return, locationCallback, Looper.getMainLooper())
             isAttached = true
         } catch (ex: SecurityException) {
             // Log.i(TAG, "fail to request location update, ignore", ex);
@@ -130,7 +131,7 @@ class LocationService: Service() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val channel =
             NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_HIGH)
         getSystemService(

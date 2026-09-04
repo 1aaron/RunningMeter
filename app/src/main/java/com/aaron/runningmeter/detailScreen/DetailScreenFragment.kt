@@ -65,7 +65,9 @@ class DetailScreenFragment(val route: Route) : Fragment(), OnMapReadyCallback {
             )?.let { uri ->
                 try {
                     outstream = activity.contentResolver.openOutputStream(uri)
-                    icon.compress(Bitmap.CompressFormat.JPEG, 100, outstream)
+                    outstream?.let {
+                        icon.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                    }
                     outstream?.close()
                 } catch (e: Exception) {
                     System.err.println(e.toString())

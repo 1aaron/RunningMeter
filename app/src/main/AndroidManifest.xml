@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true"/>
@@ -21,8 +22,9 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4258059828543306~9374391289"/>
-        <service android:name="com.aaron.runningmeter.services.LocationService" android:enabled="true" android:exported="false"/>
+        <service android:name="com.aaron.runningmeter.services.LocationService" android:enabled="true" android:exported="false" android:foregroundServiceType="location"/>
         <activity
+            android:exported="true"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:name="com.aaron.runningmeter.activities.MainActivity"
