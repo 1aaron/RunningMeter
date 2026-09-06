@@ -13,6 +13,8 @@ import com.aaron.runningmeter.utils.Globals
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Locations
@@ -22,8 +24,17 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+enum class TrackingState {
+    STOPPED, RUNNING
+}
+
 interface MapFragmentViewModelInterface {
     var locations: ArrayList<Location>
+    val locationsFlow: StateFlow<List<Location>>
+    val secondsFlow: StateFlow<Int>
+    val distanceFlow: StateFlow<Double>
+    val trackingState: StateFlow<TrackingState>
+    
     var stoppedTag: String
     var runningTag: String
     var polilyne: PolylineOptions
@@ -34,6 +45,10 @@ interface MapFragmentViewModelInterface {
     fun setMarkers(map: GoogleMap)
     fun getDistance(): Double
     fun getTimeStamp(): String
+    fun setTrackingState(state: TrackingState)
+    fun updateSeconds(seconds: Int)
+    fun updateLocations(locations: ArrayList<Location>)
+    fun clearData()
 }
 
 class MapFragmentViewModel(application: Application) : AndroidViewModel(application), MapFragmentViewModelInterface {
@@ -42,12 +57,47 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     private val _index = MutableLiveData<Int>()
     private var currentPosMarker: Marker? = null
 
+    private val _locationsFlow = MutableStateFlow<List<Location>>(emptyList())
+    override val locationsFlow: StateFlow<List<Location>> = _locationsFlow
+
+    private val _secondsFlow = MutableStateFlow(0)
+    override val secondsFlow: StateFlow<Int> = _secondsFlow
+
+    private val _distanceFlow = MutableStateFlow(0.0)
+    override val distanceFlow: StateFlow<Double> = _distanceFlow
+
+    private val _trackingState = MutableStateFlow(TrackingState.STOPPED)
+    override val trackingState: StateFlow<TrackingState> = _trackingState
+
     override var locations = arrayListOf<Location>()
     override var stoppedTag = "STOPPED"
     override var runningTag = "RUNNING"
     override var polilyne = PolylineOptions()
     override var seconds = 0
     private val dateFormatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+
+    override fun setTrackingState(state: TrackingState) {
+        _trackingState.value = state
+    }
+
+    override fun clearData() {
+        locations.clear()
+        _locationsFlow.value = emptyList()
+        _secondsFlow.value = 0
+        _distanceFlow.value = 0.0
+        seconds = 0
+    }
+
+    override fun updateSeconds(seconds: Int) {
+        this.seconds = seconds
+        _secondsFlow.value = seconds
+    }
+
+    override fun updateLocations(locations: ArrayList<Location>) {
+        this.locations = locations
+        _locationsFlow.value = locations.toList()
+        _distanceFlow.value = getDistance()
+    }
 
     override fun paintRoute(inMap: GoogleMap) {
         polilyne = PolylineOptions().color(Color.BLUE)
