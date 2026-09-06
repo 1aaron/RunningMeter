@@ -17,21 +17,18 @@ interface ListFragmentViewModelInterface {
 
 class ListFragmentViewModel(application: Application) : AndroidViewModel(application), ListFragmentViewModelInterface {
     val myApp = application
-    lateinit var db: GCTestDB
+    var db: GCTestDB = GCTestDB.getAppDataBase(application)
     private var viewModelJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-    override var routes: LiveData<List<Route>>? = null
+    override var routes: LiveData<List<Route>>? = db.routeDao().getAllRoutes()
 
     override fun load(completion: () -> Unit) {
-        db = GCTestDB.getAppDataBase(myApp.applicationContext)
         uiScope.launch {
-            getRoutes()
             completion()
         }
     }
 
-    suspend fun getRoutes() {
+    fun getRoutes() {
         routes = db.routeDao().getAllRoutes()
     }
-
 }
