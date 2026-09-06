@@ -85,7 +85,11 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-core'
     implementation 'androidx.activity:activity-compose:1.8.2'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
     implementation 'androidx.compose.runtime:runtime-livedata'
+
+    // Maps Compose
+    implementation 'com.google.maps.android:maps-compose:8.6.0'
 }
