@@ -28,6 +28,7 @@
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:name="com.aaron.runningmeter.activities.MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/app_name"
             android:theme="@style/SplashTheme">
             <intent-filter>
