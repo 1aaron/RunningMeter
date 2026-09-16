@@ -9,10 +9,12 @@ import com.aaron.runningmeter.adapters.SectionsPagerAdapter
 import com.aaron.runningmeter.databinding.ActivityMainBinding
 import com.aaron.runningmeter.services.LocationService
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.material.tabs.TabLayout
 import androidx.core.view.WindowCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.activity.addCallback
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +50,11 @@ class MainActivity : AppCompatActivity() {
         MobileAds.initialize(this) {
             // Log.e("ADS","initialize") // Descomentado si es necesario
         }
+
+        // Inicialización temprana de Google Maps para evitar el bloqueo del hilo principal
+        MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) {
+            // Inicializado de forma segura
+        }
         
         val sectionsPagerAdapter = SectionsPagerAdapter(
             this,
@@ -58,15 +65,16 @@ class MainActivity : AppCompatActivity() {
 
         val tabs: TabLayout = binding.tabs
         tabs.setupWithViewPager(viewPager)
-    }
 
-    // 3. LÓGICA DE SEGURIDAD:
-    // Previene que el usuario salga si la localización está activa.
-    override fun onBackPressed() {
-        if (LocationService.isAttached) {
-            Toast.makeText(this, R.string.in_record, Toast.LENGTH_LONG).show()
-        } else {
-            super.onBackPressed()
+        // 3. LÓGICA DE SEGURIDAD:
+        // Previene que el usuario salga si la localización está activa.
+        onBackPressedDispatcher.addCallback(this) {
+            if (LocationService.isAttached) {
+                Toast.makeText(this@MainActivity, R.string.in_record, Toast.LENGTH_LONG).show()
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
         }
     }
 }
