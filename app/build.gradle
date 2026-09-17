@@ -92,4 +92,7 @@ dependencies {
 
     // Maps Compose
     implementation 'com.google.maps.android:maps-compose:8.6.0'
+
+    // Compose Navigation
+    implementation 'androidx.navigation:navigation-compose:2.8.7'
 }

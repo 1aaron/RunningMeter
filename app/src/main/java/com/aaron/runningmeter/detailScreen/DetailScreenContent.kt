@@ -1,14 +1,6 @@
 package com.aaron.runningmeter.detailScreen
 
-import android.content.ContentValues
-import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.os.Bundle
-import android.provider.MediaStore
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,19 +9,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Locations
 import com.aaron.runningmeter.models.Route
@@ -39,74 +26,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
-import java.io.OutputStream
 import java.util.Locale
-
-class DetailScreenFragment(val route: Route) : Fragment() {
-
-    private lateinit var viewModel: DetailScreenViewModelInterface
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        viewModel = ViewModelProvider(this).get(DetailScreenViewModel::class.java)
-
-        return ComposeView(requireContext()).apply {
-            setContent {
-                MaterialTheme {
-                    val locations by viewModel.locations.observeAsState(emptyList())
-                    
-                    LaunchedEffect(Unit) {
-                        viewModel.load(route) {}
-                    }
-
-                    DetailScreenContent(
-                        route = route,
-                        locations = locations,
-                        onDelete = {
-                            viewModel.deleteRoute {
-                                activity?.supportFragmentManager?.popBackStack()
-                            }
-                        },
-                        onShare = { snapshot ->
-                            shareImage(snapshot)
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun shareImage(image: Bitmap) {
-        val share = Intent(Intent.ACTION_SEND)
-        share.type = "image/jpeg"
-
-        val values = ContentValues().apply {
-            put(MediaStore.Images.Media.TITLE, "route")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        }
-        
-        activity?.let { activity ->
-            activity.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                values
-            )?.let { uri ->
-                try {
-                    val outstream: OutputStream? = activity.contentResolver.openOutputStream(uri)
-                    outstream?.use {
-                        image.compress(Bitmap.CompressFormat.JPEG, 100, it)
-                    }
-                } catch (e: Exception) {
-                    System.err.println(e.toString())
-                }
-
-                share.putExtra(Intent.EXTRA_STREAM, uri)
-                startActivity(Intent.createChooser(share, getString(R.string.shareImage)))
-            }
-        }
-    }
-}
 
 @Composable
 fun DetailScreenContent(
@@ -149,11 +69,11 @@ fun DetailScreenContent(
                     width = 10f
                 )
                 Marker(
-                    state = rememberMarkerState(position = LatLng(locations.first().latitude, locations.first().longitude)),
+                    state = rememberUpdatedMarkerState(position = LatLng(locations.first().latitude, locations.first().longitude)),
                     icon = BitmapDescriptorFactory.fromResource(R.drawable.walk_marker)
                 )
                 Marker(
-                    state = rememberMarkerState(position = LatLng(locations.last().latitude, locations.last().longitude)),
+                    state = rememberUpdatedMarkerState(position = LatLng(locations.last().latitude, locations.last().longitude)),
                     icon = BitmapDescriptorFactory.fromResource(R.drawable.flag_checkered)
                 )
             }
@@ -182,7 +102,7 @@ fun DetailScreenContent(
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp),
+                .padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             StatItem(text = stringResource(id = R.string.distance, route.distance ?: 0.0))
@@ -238,36 +158,6 @@ fun StatItem(text: String) {
             style = MaterialTheme.typography.bodyLarge,
             fontSize = 19.sp,
             color = Color.Black
-        )
-    }
-}
-
-@Preview(showSystemUi = true, name = "Light Mode")
-@Preview(
-    showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    name = "Dark Mode"
-)
-@Composable
-fun DetailScreenPreview() {
-    val dummyRoute = Route(
-        id = 1,
-        alias = "Morning Run",
-        distance = 5.2,
-        time = 1850,
-        date = "2023-10-25"
-    )
-    val dummyLocations = listOf(
-        Locations(1, 1, 37.422, -122.084),
-        Locations(2, 1, 37.423, -122.085),
-        Locations(3, 1, 37.424, -122.086)
-    )
-    MaterialTheme {
-        DetailScreenContent(
-            route = dummyRoute,
-            locations = dummyLocations,
-            onDelete = {},
-            onShare = {}
         )
     }
 }

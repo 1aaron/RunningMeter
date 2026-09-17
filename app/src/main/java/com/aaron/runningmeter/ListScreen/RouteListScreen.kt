@@ -1,10 +1,6 @@
 package com.aaron.runningmeter.ListScreen
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,11 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,45 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import android.content.res.Configuration
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.ViewModelProvider
 import com.aaron.runningmeter.R
-import com.aaron.runningmeter.detailScreen.DetailScreenFragment
 import com.aaron.runningmeter.models.Route
-
-class ListFragment : Fragment() {
-    private lateinit var viewModel: ListFragmentViewModelInterface
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        viewModel = ViewModelProvider(this).get(ListFragmentViewModel::class.java)
-        
-        return ComposeView(requireContext()).apply {
-            setContent {
-                MaterialTheme {
-                    val routes by viewModel.routes?.observeAsState(emptyList()) ?: remember { mutableStateOf(emptyList()) }
-                    
-                    LaunchedEffect(viewModel) {
-                        viewModel.load {}
-                    }
-
-                    RouteListScreen(
-                        routes = routes,
-                        onRouteClick = { route ->
-                            activity?.supportFragmentManager?.beginTransaction()
-                                ?.replace(R.id.content_main, DetailScreenFragment(route))
-                                ?.addToBackStack(null)
-                                ?.commit()
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun RouteListScreen(
@@ -203,12 +161,3 @@ fun RouteListPreview() {
         RouteListScreen(routes = dummyRoutes, onRouteClick = {})
     }
 }
-
-@Preview(showSystemUi = true, name = "Empty State")
-@Composable
-fun EmptyListPreview() {
-    MaterialTheme {
-        RouteListScreen(routes = emptyList(), onRouteClick = {})
-    }
-}
-
