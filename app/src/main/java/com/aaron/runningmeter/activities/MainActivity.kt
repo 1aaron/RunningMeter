@@ -8,8 +8,6 @@ import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,9 +38,9 @@ import androidx.activity.result.IntentSenderRequest
 import com.aaron.runningmeter.models.Route
 import com.aaron.runningmeter.services.LocationService
 import com.aaron.runningmeter.utils.Globals
+import com.aaron.runningmeter.utils.AdManager
+import com.aaron.runningmeter.utils.StorageUtils
 import com.google.android.gms.ads.*
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -55,28 +53,26 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.core.view.WindowCompat
-import java.io.OutputStream
 
 class MainActivity : ComponentActivity() {
 
     private var gpsService: LocationService? = null
-    private var mInterstitialAd: InterstitialAd? = null
-    private val CLASS_TAG = "MainActivity"
+    private lateinit var adManager: AdManager
     private lateinit var mapViewModel: MapFragmentViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.enableEdgeToEdge(window)
 
-        // Inicialización de Ads y Maps
+        // Inicialización de componentes desacoplados
         MobileAds.initialize(this) {}
         MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) {}
+        adManager = AdManager(this)
 
         setContent {
             MaterialTheme {
                 val navController = rememberNavController()
                 
-                // Inicializar los ViewModels a nivel de Activity/Navigation
                 mapViewModel = viewModel<MapFragmentViewModel>()
                 val listViewModel = viewModel<ListFragmentViewModel>()
                 val detailViewModel = viewModel<DetailScreenViewModel>()
@@ -93,7 +89,6 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     bottomBar = {
-                        // Solo mostramos bottom bar en las pestañas principales
                         if (currentRoute == "map" || currentRoute == "list") {
                             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
                                 NavigationBarItem(
@@ -205,7 +200,7 @@ class MainActivity : ComponentActivity() {
     private fun handleStartClick() {
         if (verifyPermissionStatus()) {
             mapViewModel.clearData()
-            loadAdd()
+            adManager.loadAd()
             val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 prepareLocationService()
@@ -220,39 +215,6 @@ class MainActivity : ComponentActivity() {
     private fun handleStopClick() {
         mapViewModel.setTrackingState(TrackingState.STOPPED)
         disconnectLocationService()
-    }
-
-    private fun loadAdd() {
-        val adRequest = AdRequest.Builder().build()
-        InterstitialAd.load(this, Globals.ANNOUNCEMENT_ID, adRequest, object : InterstitialAdLoadCallback() {
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.e(CLASS_TAG, adError.message)
-                mInterstitialAd = null
-            }
-
-            override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                Log.e(CLASS_TAG, "Ad was loaded.")
-                mInterstitialAd = interstitialAd
-                setListeners()
-            }
-        })
-    }
-
-    private fun setListeners() {
-        mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                Log.e(CLASS_TAG, "Ad was dismissed.")
-            }
-
-            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                Log.e(CLASS_TAG, "Ad failed to show.")
-            }
-
-            override fun onAdShowedFullScreenContent() {
-                Log.e(CLASS_TAG, "Ad showed fullscreen content.")
-                mInterstitialAd = null
-            }
-        }
     }
 
     private fun prepareLocationService() {
@@ -394,31 +356,16 @@ class MainActivity : ComponentActivity() {
     private fun saveRoute(alias: String) {
         Toast.makeText(this, getString(R.string.saving), Toast.LENGTH_SHORT).show()
         mapViewModel.saveRoute(alias) {
-            mInterstitialAd?.show(this)
+            adManager.showAd(this)
         }
     }
 
     private fun shareImage(image: Bitmap) {
-        val share = Intent(Intent.ACTION_SEND).apply {
-            type = "image/jpeg"
-        }
-
-        val values = ContentValues().apply {
-            put(MediaStore.Images.Media.TITLE, "route")
-            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-        }
-        
-        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)?.let { uri ->
-            try {
-                val outstream: OutputStream? = contentResolver.openOutputStream(uri)
-                outstream?.use {
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, it)
-                }
-            } catch (e: Exception) {
-                System.err.println(e.toString())
+        StorageUtils.saveRouteImageToGallery(this, image)?.let { uri ->
+            val share = Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
             }
-
-            share.putExtra(Intent.EXTRA_STREAM, uri)
             startActivity(Intent.createChooser(share, getString(R.string.shareImage)))
         }
     }
