@@ -15,12 +15,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavType
@@ -35,6 +37,7 @@ import com.aaron.runningmeter.extensions.showLocationPermissionDialog
 import com.aaron.runningmeter.mapScreen.MapFragmentViewModel
 import com.aaron.runningmeter.mapScreen.MapScreenContent
 import com.aaron.runningmeter.mapScreen.TrackingState
+import com.aaron.runningmeter.ui.theme.RunningMeterTheme
 import androidx.activity.result.IntentSenderRequest
 import com.aaron.runningmeter.models.Route
 import com.aaron.runningmeter.services.LocationService
@@ -55,6 +58,7 @@ import java.nio.charset.StandardCharsets
 import androidx.core.content.PermissionChecker.PERMISSION_DENIED
 import androidx.core.view.WindowCompat
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     private var gpsService: LocationService? = null
@@ -71,7 +75,7 @@ class MainActivity : ComponentActivity() {
         adManager = AdManager(this)
 
         setContent {
-            MaterialTheme {
+            RunningMeterTheme {
                 val navController = rememberNavController()
                 
                 mapViewModel = viewModel<MapFragmentViewModel>()
@@ -96,8 +100,37 @@ class MainActivity : ComponentActivity() {
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = currentBackStackEntry?.destination?.route
 
+                val topBarTitle = when {
+                    currentRoute == "map" -> stringResource(id = R.string.app_name)
+                    currentRoute == "list" -> stringResource(id = R.string.list_tab_text)
+                    currentRoute?.startsWith("detail") == true -> {
+                        val routeJson = currentBackStackEntry?.arguments?.getString("routeJson")
+                        val decodedJson = URLDecoder.decode(routeJson ?: "", StandardCharsets.UTF_8.toString())
+                        val route = Gson().fromJson(decodedJson, Route::class.java)
+                        route.alias ?: "Route"
+                    }
+                    else -> stringResource(id = R.string.app_name)
+                }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        CenterAlignedTopAppBar(
+                            title = { Text(topBarTitle) },
+                            navigationIcon = {
+                                if (currentRoute?.startsWith("detail") == true) {
+                                    IconButton(onClick = { navController.popBackStack() }) {
+                                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    }
+                                }
+                            },
+                            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        )
+                    },
                     bottomBar = {
                         if (currentRoute == "map" || currentRoute == "list") {
                             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
@@ -132,7 +165,9 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = "map",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
                     ) {
                         composable("map") {
                             MapScreenContent(

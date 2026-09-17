@@ -79,26 +79,6 @@ fun DetailScreenContent(
             }
         }
 
-        // Overlays
-        Surface(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth(0.8f),
-            shape = RoundedCornerShape(8.dp),
-            color = Color.White.copy(alpha = 0.8f),
-            shadowElevation = 4.dp
-        ) {
-            Text(
-                text = stringResource(id = R.string.routeName, route.alias ?: ""),
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color.Black
-            )
-        }
-
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
