@@ -34,6 +34,8 @@ interface MapFragmentViewModelInterface {
     val secondsFlow: StateFlow<Int>
     val distanceFlow: StateFlow<Double>
     val trackingState: StateFlow<TrackingState>
+    val userLocation: StateFlow<Location?>
+    val isMyLocationEnabled: StateFlow<Boolean>
     
     var stoppedTag: String
     var runningTag: String
@@ -69,6 +71,12 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
     private val _trackingState = MutableStateFlow(TrackingState.STOPPED)
     override val trackingState: StateFlow<TrackingState> = _trackingState
 
+    private val _userLocation = MutableStateFlow<Location?>(null)
+    override val userLocation: StateFlow<Location?> = _userLocation
+
+    private val _isMyLocationEnabled = MutableStateFlow(false)
+    override val isMyLocationEnabled: StateFlow<Boolean> = _isMyLocationEnabled
+
     override var locations = arrayListOf<Location>()
     override var stoppedTag = "STOPPED"
     override var runningTag = "RUNNING"
@@ -97,6 +105,17 @@ class MapFragmentViewModel(application: Application) : AndroidViewModel(applicat
         this.locations = locations
         _locationsFlow.value = locations.toList()
         _distanceFlow.value = getDistance()
+        if (locations.isNotEmpty()) {
+            _userLocation.value = locations.last()
+        }
+    }
+
+    fun updateUserLocation(location: Location) {
+        _userLocation.value = location
+    }
+
+    fun setMyLocationEnabled(enabled: Boolean) {
+        _isMyLocationEnabled.value = enabled
     }
 
     override fun paintRoute(inMap: GoogleMap) {

@@ -2,6 +2,7 @@ package com.aaron.runningmeter.activities
 
 import android.Manifest
 import android.content.*
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Location
 import android.location.LocationManager
@@ -74,6 +75,13 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 
                 mapViewModel = viewModel<MapFragmentViewModel>()
+                
+                LaunchedEffect(Unit) {
+                    mapViewModel.setMyLocationEnabled(checkPermissions())
+                    if (checkPermissions()) {
+                        fetchLastLocation(mapViewModel)
+                    }
+                }
                 val listViewModel = viewModel<ListFragmentViewModel>()
                 val detailViewModel = viewModel<DetailScreenViewModel>()
 
@@ -81,6 +89,8 @@ class MainActivity : ComponentActivity() {
                 val locations by mapViewModel.locationsFlow.collectAsState()
                 val seconds by mapViewModel.secondsFlow.collectAsState()
                 val distance by mapViewModel.distanceFlow.collectAsState()
+                val userLocation by mapViewModel.userLocation.collectAsState()
+                val isMyLocationEnabled by mapViewModel.isMyLocationEnabled.collectAsState()
 
                 var showAliasDialog by remember { mutableStateOf(false) }
                 val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -130,6 +140,8 @@ class MainActivity : ComponentActivity() {
                                 locations = locations,
                                 seconds = seconds,
                                 distance = distance,
+                                userLocation = userLocation,
+                                isMyLocationEnabled = isMyLocationEnabled,
                                 onFabClick = {
                                     if (trackingState == TrackingState.STOPPED) {
                                         handleStartClick()
@@ -312,6 +324,8 @@ class MainActivity : ComponentActivity() {
             if (!value) accepted = false
         }
         if (accepted) {
+            mapViewModel.setMyLocationEnabled(true)
+            fetchLastLocation(mapViewModel)
             handleStartClick()
         } else {
             Toast.makeText(this, getString(R.string.accept_permisses), Toast.LENGTH_SHORT).show()
@@ -367,6 +381,23 @@ class MainActivity : ComponentActivity() {
                 putExtra(Intent.EXTRA_STREAM, uri)
             }
             startActivity(Intent.createChooser(share, getString(R.string.shareImage)))
+        }
+    }
+
+    private fun checkPermissions(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun fetchLastLocation(viewModel: MapFragmentViewModel) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        try {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    viewModel.updateUserLocation(it)
+                }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
         }
     }
 

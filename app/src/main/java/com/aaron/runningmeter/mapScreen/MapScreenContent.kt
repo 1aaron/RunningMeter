@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.aaron.runningmeter.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
@@ -27,12 +28,25 @@ fun MapScreenContent(
     locations: List<Location>,
     seconds: Int,
     distance: Double,
+    userLocation: Location?,
+    isMyLocationEnabled: Boolean,
     onFabClick: () -> Unit,
     showAliasDialog: Boolean,
     onDismissAliasDialog: () -> Unit,
     onSaveRoute: (String) -> Unit
 ) {
     val cameraPositionState = rememberCameraPositionState()
+    var hasCentredOnInitialLocation by remember { mutableStateOf(false) }
+
+    LaunchedEffect(userLocation) {
+        if (userLocation != null && !hasCentredOnInitialLocation && locations.isEmpty()) {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                LatLng(userLocation.latitude, userLocation.longitude),
+                18f
+            )
+            hasCentredOnInitialLocation = true
+        }
+    }
     
     LaunchedEffect(locations, trackingState) {
         if (locations.isNotEmpty()) {
@@ -57,7 +71,7 @@ fun MapScreenContent(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = trackingState == TrackingState.RUNNING)
+            properties = MapProperties(isMyLocationEnabled = isMyLocationEnabled)
         ) {
             if (locations.isNotEmpty()) {
                 Polyline(
