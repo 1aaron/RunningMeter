@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
+// import androidx.compose.ui.res.colorResource // Removed unused import for colorResource (using theme colors)
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aaron.runningmeter.R
 import com.aaron.runningmeter.models.Route
+import com.aaron.runningmeter.ui.theme.RunningMeterTheme
 
 @Composable
 fun RouteListScreen(
@@ -32,7 +33,7 @@ fun RouteListScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.list_background))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (routes.isEmpty()) {
             EmptyStateView()
@@ -63,7 +64,7 @@ fun RouteItemCard(route: Route, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -84,10 +85,10 @@ fun RouteItemCard(route: Route, onClick: () -> Unit) {
             ) {
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = Color.Gray)) {
+                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))) {
                             append("Route: ")
                         }
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)) {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)) {
                             append(route.alias ?: "Route")
                         }
                     },
@@ -101,10 +102,10 @@ fun RouteItemCard(route: Route, onClick: () -> Unit) {
                 ) {
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(color = Color.Gray)) {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))) {
                                 append("Time: ")
                             }
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)) {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)) {
                                 append(timeFormatted)
                             }
                         },
@@ -113,7 +114,7 @@ fun RouteItemCard(route: Route, onClick: () -> Unit) {
                     Text(
                         text = route.date ?: "",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.LightGray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -157,7 +158,7 @@ fun RouteListPreview() {
         Route(id = 2, alias = "Morning Run", time = 3600, date = "2023-10-26"),
         Route(id = 3, alias = "Short Walk", time = 600, date = "2023-10-27")
     )
-    MaterialTheme {
+    RunningMeterTheme {
         RouteListScreen(routes = dummyRoutes, onRouteClick = {})
     }
 }

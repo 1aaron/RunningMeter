@@ -21,4 +21,7 @@
     <string name="accept_permisses">Acepta los permisos</string>
     <string name="empty_routes_text">You don\'t have saved routes yet.</string>
     <string name="in_record">In record</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="delete_confirmation_message">Are you sure you want to delete this route?</string>
+    <string name="cancel">Cancel</string>
 </resources>
