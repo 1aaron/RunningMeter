@@ -1,5 +1,6 @@
 package com.aaron.runningmeter.mapScreen
 
+import android.content.res.Configuration
 import android.location.Location
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aaron.runningmeter.R
+import com.aaron.runningmeter.ui.theme.RunningMeterTheme
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -71,7 +73,11 @@ fun MapScreenContent(
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = isMyLocationEnabled)
+            properties = MapProperties(isMyLocationEnabled = isMyLocationEnabled),
+            uiSettings = MapUiSettings(
+                    zoomControlsEnabled = false,
+                myLocationButtonEnabled = false
+            )
         ) {
             if (locations.isNotEmpty()) {
                 Polyline(
@@ -153,7 +159,7 @@ fun MapScreenContent(
 fun StatItem(text: String) {
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = Color.White.copy(alpha = 0.8f),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
         shadowElevation = 2.dp
     ) {
         Text(
@@ -161,7 +167,31 @@ fun StatItem(text: String) {
             modifier = Modifier.padding(10.dp),
             style = MaterialTheme.typography.bodyLarge,
             fontSize = 19.sp,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Preview(showSystemUi = true, name = "Light Mode")
+@Preview(
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "Dark Mode"
+)
+@Composable
+fun MapScreenPreview() {
+    RunningMeterTheme {
+        MapScreenContent(
+            trackingState = TrackingState.STOPPED,
+            locations = emptyList(),
+            seconds = 1850,
+            distance = 5.2,
+            userLocation = null,
+            isMyLocationEnabled = false,
+            onFabClick = {},
+            showAliasDialog = false,
+            onDismissAliasDialog = {},
+            onSaveRoute = {}
         )
     }
 }
